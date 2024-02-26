@@ -1,0 +1,29 @@
+.text {
+  @apply ml-1;
+  font-size: inherit;
+  font-weight: inherit;
+}
+
+.jv.dark {
+  @apply text-gray-800;
+}
+
+.jv.light {
+  @apply text-accent-500;
+}
+
+.jv.white {
+  @apply text-white;
+}
+
+.audit.dark {
+  @apply text-secondary-500;
+}
+
+.audit.light {
+  @apply text-secondary-500;
+}
+
+.audit.white {
+  @apply text-secondary-500;
+}
