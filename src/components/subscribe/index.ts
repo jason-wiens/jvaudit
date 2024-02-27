@@ -1,1 +1,1 @@
-export { default as Subscribe } from "./subscribe.component";
+export { Subscribe } from "./subscribe.component";
