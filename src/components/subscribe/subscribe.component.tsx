@@ -1,7 +1,6 @@
 "use client";
 
 import { Logo } from "@components/logo";
-import { useForm } from "react-hook-form";
 import { Label } from "@components/ui/label";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
@@ -9,20 +8,18 @@ import { Textarea } from "../ui/textarea";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 import { subscriberSchema, SubscriberFormInputs } from "@models/subscriber";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { addSubscriber } from "@/actions/addMarketingSubscriber";
+import { useFormAction } from "@/hooks/use-form-action.hook";
 
 export function Subscribe() {
-  const {
-    register,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
-    trigger,
-    getValues,
-  } = useForm<SubscriberFormInputs>({
-    resolver: zodResolver(subscriberSchema),
-  });
+  const { register, handleSubmit, errors, pending, isSubmitSuccessful } =
+    useFormAction<SubscriberFormInputs>({
+      schema: subscriberSchema,
+      action: addSubscriber,
+    });
 
   return (
-    <div className="mt-32 w-full flex flex-col justify-center items-center bg-gray-100 p-16">
+    <div className="w-full flex flex-col justify-center items-center bg-gray-100 p-16">
       <div className="mb-8 text-center">
         <span className="font-bold">
           <Logo />
@@ -40,12 +37,15 @@ export function Subscribe() {
           <div className="">We will be in touch soon.</div>
         </div>
       ) : (
-        <form className="w-full max-w-md flex flex-col gap-2">
+        <form
+          className="w-full max-w-md flex flex-col gap-2"
+          action={handleSubmit}
+        >
           <div className="space-y-1">
             <Label htmlFor="name" className="">
               Name
             </Label>
-            <Input id="name" {...register("name")} disabled={isSubmitting} />
+            <Input id="name" {...register("name")} disabled={pending} />
             {errors.name && (
               <p className="text-red-500 text-sm">{errors.name.message}</p>
             )}
@@ -54,7 +54,7 @@ export function Subscribe() {
             <Label htmlFor="email" className="">
               Email
             </Label>
-            <Input id="email" {...register("email")} disabled={isSubmitting} />
+            <Input id="email" {...register("email")} disabled={pending} />
             {errors.email && (
               <p className="text-red-500 text-sm">{errors.email.message}</p>
             )}
@@ -63,11 +63,7 @@ export function Subscribe() {
             <Label htmlFor="company" className="">
               Company
             </Label>
-            <Input
-              id="company"
-              {...register("company")}
-              disabled={isSubmitting}
-            />
+            <Input id="company" {...register("company")} disabled={pending} />
             {errors.company && (
               <p className="text-red-500 text-sm">{errors.company.message}</p>
             )}
@@ -79,7 +75,7 @@ export function Subscribe() {
             <Textarea
               id="comments"
               {...register("comments")}
-              disabled={isSubmitting}
+              disabled={pending}
               rows={3}
             />
             {errors.comments && (
@@ -88,7 +84,7 @@ export function Subscribe() {
           </div>
           <div className="flex justify-end mt-8">
             <Button type="submit" variant="accent">
-              {isSubmitting ? (
+              {pending ? (
                 <>
                   <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
                   Submitting...
