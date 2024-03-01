@@ -12,6 +12,7 @@
     "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
   },
   "dependencies": {
+    "@auth0/auth0-react": "^2.2.4",
     "@hookform/resolvers": "^3.3.4",
     "@prisma/client": "^5.10.2",
     "@radix-ui/react-dialog": "^1.0.5",
@@ -30,7 +31,8 @@
     "sonner": "^1.4.1",
     "tailwind-merge": "^2.2.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.22.4"
+    "zod": "^3.22.4",
+    "zustand": "^4.5.1"
   },
   "devDependencies": {
     "@types/node": "^20",
