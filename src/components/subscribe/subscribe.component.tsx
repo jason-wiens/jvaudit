@@ -7,7 +7,10 @@ import { Button } from "@components/ui/button";
 import { Textarea } from "../ui/textarea";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
-import { subscriberSchema, SubscriberFormInputs } from "@schemas/subscriber";
+import {
+  subscriberSchema,
+  SubscriberFormInputs,
+} from "@schemas/subscriber.schema";
 import { addSubscriber } from "@/actions/addMarketingSubscriber";
 import { useFormAction } from "@/hooks/use-form-action.hook";
 

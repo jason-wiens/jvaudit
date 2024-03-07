@@ -1,7 +1,10 @@
 "use server";
 
 import prisma from "@lib/db";
-import { subscriberSchema, SubscriberFormInputs } from "@models/subscriber";
+import {
+  subscriberSchema,
+  SubscriberFormInputs,
+} from "@schemas/subscriber.schema";
 import { serializeZodError } from "@/lib/utils";
 import type { ServerActionResponse } from "@/types/types";
 

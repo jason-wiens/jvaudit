@@ -16,41 +16,188 @@ datasource db {
 
 
 model MarketingContacts {
-  id        Int      @id @default(autoincrement())
-  email     String   @unique
-  name      String
-  company   String
-  comments  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id                  Int           @id @default(autoincrement())
+  email               String        @unique
+  name                String
+  company             String
+  comments            String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+}
+
+model Tenant {
+  tenantId            String        @id @default(uuid())
+  name                String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  users               User[]
+  companies           Company[]
+  people              Person[]
+  audits              Audit[]
+  resources           Resource[]
+  scopes              Scope[]
 }
 
 model Person {
-  personId  String  @id @default(uuid())
-  email     String   @unique
-  firstName      String
-  lastName      String
-  comments  String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  personId            String        @id @default(uuid())
+  tenantId            String
+  email               String    
+  firstName           String
+  lastName            String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  employeeOfId        String        @unique
+  primaryContactForId String?       @unique
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
 
-  companyId   String @unique
-  company  Company @relation(fields: [companyId], references: [companyId])
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  employeeOf          Company       @relation("employee", fields: [employeeOfId], references: [companyId])
+  primaryContactFor   Company?      @relation("primaryContact", fields: [primaryContactForId], references: [companyId])
+  userDetails         User?
+  resources           Resource[] 
+
+  @@unique([tenantId, email])
 }
 
 model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  userId              String        @id @default(uuid())
+  tenantId            String
+  username            String        @unique
+  password            String
+  avatarUrl           String?
+  role                Role[]        @default([USER])
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
+  profileId           String        @unique
+  
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  profile             Person        @relation(fields: [profileId], references: [personId])
 }
 
 model Company {
-  companyId        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  employees Person[]
+  companyId           String        @id @default(uuid())
+  tenantId            String
+  fullLegalName       String
+  shortName           String
+  address             String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  primaryContactId    String?
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
+  
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  primaryContact      Person?       @relation("primaryContact")
+  employees           Person[]      @relation("employee")
+  stakeholderIn       Audit[]       @relation("stakeholder")
+  suppliedResources   Resource[]
+
+  @@unique([tenantId, shortName])
+  @@unique([tenantId, fullLegalName])
 }
+
+model Audit {
+  auditId             String        @id @default(uuid())
+  tenantId            String
+  auditNumber         String
+  auditDescription    String
+  status              AuditStatus   @default(CREATED)
+  statusDate          DateTime      @default(now())
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  stakeholders        Company[]     @relation("stakeholder")
+  resources           Resource[]
+  scopes              Scope[]
+
+  @@unique([tenantId, auditNumber])
+}
+
+model Resource {
+  resourceId          String        @id @default(uuid())
+  tenantId            String
+  type                ResourceType
+  description         String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
+  personId            String
+  companyId           String
+  auditId             String
+  assignedToId        String?    
+  
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  person              Person        @relation(fields: [personId], references: [personId])
+  company             Company       @relation(fields: [companyId], references: [companyId])
+  audit               Audit         @relation(fields: [auditId], references: [auditId])
+  assignedTo          Scope?        @relation(fields: [assignedToId], references: [scopeId])
+}
+
+
+model Scope {
+  scopeId             String        @id @default(uuid())
+  tenantId            String
+  type                ScopeType
+  budget              Int
+  description         String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
+  auditId             String
+
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  resources           Resource[]
+  audit               Audit         @relation(fields: [auditId], references: [auditId])
+}
+
+
+enum Role {
+  USER
+  ADMIN
+  SUPER_USER
+}
+
+enum AuditStatus {
+  CREATED
+  CONFIRMED
+  PREPERATION
+  FIELDWORK
+  REPORTING
+  SUBMITTED
+  RESOLVED
+  CLOSED
+  CANCELLED
+}
+
+enum ResourceType {
+  AUDITOR
+  PRIMARY_CONTACT_OPERATOR
+  PRIMARY_CONTACT_LEAD
+  AUDIT_CONTACT_OPERATOR
+  AUDIT_CONTACT_NON_OPERATOR
+  MANAGER
+  OBSERVER
+}
+
+enum ScopeType {
+  CAPITAL_EXPENDITURES
+  OPERATING_EXPENSES
+  PRODUCTION_ALLOCATIONS
+  EQUALIZATIONS
+  FEES
+  FEE_INCOME
+  MARKETING
+  MANAGEMENT
+  ADMINISTRATION
+}
+
+
 

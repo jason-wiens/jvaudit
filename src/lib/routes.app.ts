@@ -29,9 +29,6 @@ export enum AppRoutes {
   AdminUsers = "/admin/users",
   AddUser = "/admin/users/add",
   EditUser = "/admin/users/:userId/edit",
-  AdminPeople = "/admin/contacts",
-  AddPerson = "/admin/contacts/add",
-  EditPerson = "/admin/contacts/:personId/edit",
 
   // Error Routes
   Forbidden = "/app/forbidden",
