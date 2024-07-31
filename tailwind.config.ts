@@ -17,6 +17,19 @@ const config = {
         "2xl": "1400px",
       },
     },
+    fontSize: {
+      xs: "0.5rem",
+      sm: "0.75rem",
+      base: "0.875rem",
+      lg: "1rem",
+      xl: "1.125rem",
+      "2xl": "1.25rem",
+      "3xl": "1.5rem",
+      "4xl": "1.875rem",
+      "5xl": "2.25rem",
+      "6xl": "3rem",
+      "7xl": "4rem",
+    },
     extend: {
       colors: {
         primary: {
@@ -34,6 +47,12 @@ const config = {
           500: "#E10098",
           900: "#A5006F",
         },
+      },
+      maxWidth: {
+        container: "1400px",
+      },
+      width: {
+        modal: "600px",
       },
     },
     boxShadow: {

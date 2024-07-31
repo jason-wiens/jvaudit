@@ -1,39 +1,44 @@
-export enum AppRoutes {
-  // Public Routes
-  HomePage = "/",
-  LoginPage = "/auth/login",
-  ContactUsPage = "/contact",
+export type AppRouteParams = {
+  auditId?: string;
+  companyId?: string;
+  userId?: string;
+};
 
-  // User Routes
+export class AppRoutes {
+  static HomePage = () => "/";
+  static LoginPage = () => "/auth/login";
+  static ContactUsPage = () => "/contact";
 
-  // Main
-  Dashboard = "/app/main/dashboard",
-  Audits = "/app/main/audits",
-  IRs = "/app/main/irs",
-  Queries = "/app/main/queries",
+  static Dashboard = () => "/app/dashboard";
+  static Audits = () => "/app/audits";
 
-  // Audit Routes
-  GeneralInfo = "/app/audits/:auditId/general",
-  AuditIRs = "/app/audits/:auditId/irs",
-  AuditQueries = "/app/audits/:auditId/queries",
-  AuditReport = "/app/audits/:auditId/report",
+  static GeneralInfo = (params: AppRouteParams) =>
+    `/app/audits/${params.auditId || "noAuditId"}/general`;
+  static AuditIRs = (params: AppRouteParams) =>
+    `/app/audits/${params.auditId || "noAuditId"}/irs`;
+  static AuditQueries = (params: AppRouteParams) =>
+    `/app/audits/${params.auditId || "noAuditId"}/queries`;
+  static AuditReport = (params: AppRouteParams) =>
+    `/app/audits/${params.auditId || "noAuditId"}/report`;
+  static AuditResponses = (params: AppRouteParams) =>
+    `/app/audits/${params.auditId || "noAuditId"}/responses`;
 
-  // Admin Routes
-  AdminDashboard = "/admin/dashboard",
-  AdminAudits = "/admin/audits",
-  AddAudit = "/admin/audits/add",
-  EditAudit = "/admin/audits/:auditId/edit",
-  AdminCompanies = "/admin/companies",
-  AddCompany = "/admin/companies/add",
-  EditCompany = "/admin/companies/:companyId/edit",
-  AdminUsers = "/admin/users",
-  AddUser = "/admin/users/add",
-  EditUser = "/admin/users/:userId/edit",
+  static AdminDashboard = () => "/admin/dashboard";
 
-  // Error Routes
-  Forbidden = "/app/forbidden",
-  NotFound = "/app/not-found",
+  static AdminAudits = () => "/admin/audits";
+  static AdminAudit = (params: AppRouteParams) =>
+    `/admin/audits/${params.auditId || "noAuditId"}`;
 
-  // Settings Routes
-  Settings = "/app/settings",
+  static AdminCompanies = () => "/admin/companies";
+  static AdminCompany = (params: AppRouteParams) =>
+    `/admin/companies/${params.companyId || "noCompanyId"}`;
+
+  static AdminUsers = () => "/admin/users";
+  static AdminUser = (params: AppRouteParams) =>
+    `/admin/users/${params.userId || "noUserId"}`;
+
+  static Forbidden = () => "/app/forbidden";
+  static NotFound = () => "/app/not-found";
+
+  static Settings = () => "/app/settings";
 }

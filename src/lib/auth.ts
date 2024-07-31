@@ -3,7 +3,7 @@ import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { loginSchema } from "@/schemas/login.schema";
-import type { Role } from "@prisma/client";
+import { User } from "next-auth";
 
 import { userGuard, adminGuard } from "@/guards";
 import { AppRoutes } from "./routes.app";
@@ -31,6 +31,7 @@ export const {
           },
           include: {
             profile: true,
+            tenant: true,
           },
         });
 
@@ -44,7 +45,7 @@ export const {
           return null;
         }
 
-        const serializedUser = {
+        const serializedUser: User = {
           id: user.userId,
           userId: user.userId,
           username: user.username,
@@ -53,6 +54,8 @@ export const {
           email: user.profile.email,
           avatarUrl: user.avatarUrl,
           role: user.role,
+          tenantId: user.tenant.tenantId,
+          tenantName: user.tenant.name,
         };
 
         return serializedUser;
@@ -72,12 +75,17 @@ export const {
       const isLoggedIn = !!auth?.user;
       const isTryingToAccessApp = request.nextUrl.pathname.includes("/app");
       const isTryingToAccessAdmin = request.nextUrl.pathname.includes("/admin");
+      const isTryingToAccessAPI = request.nextUrl.pathname.includes("/api");
+
+      if (isTryingToAccessAPI) return true;
 
       if (!isTryingToAccessAdmin && !isTryingToAccessApp && !isLoggedIn)
         return true;
 
       if (isLoggedIn && !isTryingToAccessAdmin && !isTryingToAccessApp) {
-        return Response.redirect(new URL(AppRoutes.Dashboard, request.nextUrl));
+        return Response.redirect(
+          new URL(AppRoutes.Dashboard(), request.nextUrl)
+        );
       }
 
       if (isTryingToAccessApp) return userGuard(auth);
@@ -94,6 +102,8 @@ export const {
         token.email = user.email || "";
         token.avatarUrl = user.avatarUrl || "";
         token.role = user.role;
+        token.tenantId = user.tenantId;
+        token.tenantName = user.tenantName;
       }
       return token;
     },
@@ -106,6 +116,8 @@ export const {
         session.user.email = token.email;
         session.user.avatarUrl = token.avatarUrl;
         session.user.role = token.role;
+        session.user.tenantId = token.tenantId;
+        session.user.tenantName = token.tenantName;
       }
       return session;
     },

@@ -23,17 +23,17 @@ const HomePage = () => {
           <ul className="flex items-center gap-8">
             <li>
               <Button asChild variant="ghost">
-                <Link href={AppRoutes.ContactUsPage}>Contact Sales</Link>
+                <Link href={AppRoutes.ContactUsPage()}>Contact Sales</Link>
               </Button>
             </li>
             <li>
               <Button asChild variant="ghost">
-                <Link href={AppRoutes.LoginPage}>Log In</Link>
+                <Link href={AppRoutes.LoginPage()}>Log In</Link>
               </Button>
             </li>
             <li>
               <Button asChild>
-                <Link href={AppRoutes.LoginPage}>Get Started</Link>
+                <Link href={AppRoutes.LoginPage()}>Get Started</Link>
               </Button>
             </li>
           </ul>
@@ -56,7 +56,7 @@ const HomePage = () => {
               </div>
             </div>
             <Button asChild>
-              <Link href={AppRoutes.LoginPage}>Get Started</Link>
+              <Link href={AppRoutes.LoginPage()}>Get Started</Link>
             </Button>
           </div>
           <div className="flex-1 relative">

@@ -17,7 +17,14 @@ export type FailedServerActionResponse<Input extends Record<string, any> = {}> =
 
 export type ServerActionResponse<
   Input extends Record<string, any> = {},
-  ResponseData = {}
+  ResponseData = void
 > =
   | SuccessfulServerActionResponse<ResponseData>
   | FailedServerActionResponse<Input>;
+
+export type Alert = {
+  id: string;
+  type: "success" | "warning" | "error";
+  title?: string;
+  text: string;
+};

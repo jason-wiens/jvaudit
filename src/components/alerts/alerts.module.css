@@ -1,0 +1,42 @@
+.container {
+  @apply absolute top-4 right-0 w-96 translate-x-full z-50;
+}
+
+.alert {
+  @apply bg-white w-full p-4 relative -translate-x-[400px] border-l-8 mb-4;
+  /* animation: slideIn 0.5s ease-in-out forwards; */
+}
+
+.title {
+  @apply text-base font-semibold;
+}
+
+.text {
+  @apply text-sm;
+}
+
+.close {
+  @apply absolute top-0 right-0 py-2 px-4 cursor-pointer transition-colors;
+}
+
+.alert.success {
+  @apply border-green-500 shadow-success;
+}
+
+.close.success {
+  @apply hover:text-green-500;
+}
+
+.alert.error {
+  @apply border-red-500 shadow-error;
+}
+.close.error {
+  @apply hover:text-red-500;
+}
+
+.alert.warning {
+  @apply border-yellow-500 shadow-warning;
+}
+.close.warning {
+  @apply hover:text-yellow-500;
+}

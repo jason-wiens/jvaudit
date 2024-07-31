@@ -11,8 +11,8 @@ import {
   subscriberSchema,
   SubscriberFormInputs,
 } from "@schemas/subscriber.schema";
-import { addSubscriber } from "@/actions/addMarketingSubscriber";
-import { useFormAction } from "@/hooks/use-form-action.hook";
+import { addSubscriber } from "@/actions/website/addMarketingSubscriber";
+import { useFormAction } from "@/hooks/use-form-optimistic.hook";
 
 export function Subscribe() {
   const { register, handleSubmit, errors, pending, isSubmitSuccessful } =

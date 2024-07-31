@@ -15,15 +15,18 @@ const buttonVariants = cva(
         outline:
           "border border-zinc-200 bg-white hover:bg-zinc-100 hover:text-zinc-900",
         secondary: "bg-zinc-100 text-zinc-900 hover:bg-zinc-100/80",
-        ghost: "hover:bg-zinc-100 hover:text-zinc-900",
+        ghost: "hover:bg-zinc-200 hover:text-zinc-900",
+        ghostSecondary: "hover:bg-secondary-500/20 hover:text-secondary-900",
         link: "text-zinc-900 underline-offset-4 hover:underline",
-        accent: "bg-accent-500 text-zinc-50 hover:bg-accent-500/90",
+        accent: "bg-accent-500 text-zinc-50 hover:bg-accent-900",
+        add: "bg-green-500 text-zinc-50 hover:bg-green-700",
+        green: "bg-green-500 text-zinc-50 hover:bg-green-700",
       },
       size: {
         default: "h-10 px-6 py-2",
-        sm: "h-9 rounded-md px-3",
+        sm: "px-3 py-1 text-sm",
         lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        icon: "h-8 w-8",
       },
     },
     defaultVariants: {

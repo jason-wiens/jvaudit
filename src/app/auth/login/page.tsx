@@ -1,6 +1,6 @@
 "use client";
 
-import { useFormAction } from "@/hooks/use-form-action.hook";
+import { useFormAsync } from "@/hooks/use-form-async.hook";
 import { loginSchema, LoginFormInputs } from "@/schemas/login.schema";
 import { login } from "@/actions/auth/login";
 
@@ -9,12 +9,10 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { ReloadIcon } from "@radix-ui/react-icons";
-import { redirect } from "next/navigation";
-import { AppRoutes } from "@/lib/routes.app";
 
 export default function LoginPage() {
   const { register, handleSubmit, errors, pending } =
-    useFormAction<LoginFormInputs>({
+    useFormAsync<LoginFormInputs>({
       schema: loginSchema,
       action: login,
     });
@@ -27,11 +25,6 @@ export default function LoginPage() {
             <div className="flex justify-center font-bold text-4xl mb-12">
               <Logo classes="text-4xl" />
             </div>
-            {(!!errors.username || !!errors.password) && (
-              <h3 className="text-red-500 text-center mb-6">
-                Invalid Login Attempt
-              </h3>
-            )}
           </div>
           <form action={handleSubmit}>
             <div className="space-y-1">
@@ -55,6 +48,9 @@ export default function LoginPage() {
                 disabled={pending}
               />
             </div>
+            {(!!errors.username || !!errors.password) && (
+              <h3 className="text-red-500 mt-2">Invalid Login Attempt</h3>
+            )}
             <div className="w-full mt-16 flex justify-center">
               <Button type="submit" disabled={pending}>
                 {pending ? (

@@ -36,6 +36,8 @@ model Tenant {
   audits              Audit[]
   resources           Resource[]
   scopes              Scope[]
+  employees           Employee[]
+  stakeholders        Stakeholder[]
 }
 
 model Person {
@@ -46,16 +48,12 @@ model Person {
   lastName            String
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-  employeeOfId        String        @unique
-  primaryContactForId String?       @unique
   active              Boolean       @default(true)
   activeDate          DateTime      @default(now())
 
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
-  employeeOf          Company       @relation("employee", fields: [employeeOfId], references: [companyId])
-  primaryContactFor   Company?      @relation("primaryContact", fields: [primaryContactForId], references: [companyId])
+  employeeDetails     Employee?     
   userDetails         User?
-  resources           Resource[] 
 
   @@unique([tenantId, email])
 }
@@ -77,6 +75,24 @@ model User {
   profile             Person        @relation(fields: [profileId], references: [personId])
 }
 
+model Employee {
+  employeeId          String        @id @default(uuid())
+  tenantId            String
+  personId            String        @unique
+  companyId           String
+  primaryContact      Boolean       @default(false)
+  position            String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
+
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  personalProfile     Person        @relation(fields: [personId], references: [personId])
+  employerProfile     Company       @relation(fields: [companyId], references: [companyId])
+  resourceFor         Resource[]
+}
+
 model Company {
   companyId           String        @id @default(uuid())
   tenantId            String
@@ -85,18 +101,29 @@ model Company {
   address             String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
-  primaryContactId    String?
   active              Boolean       @default(true)
   activeDate          DateTime      @default(now())
   
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
-  primaryContact      Person?       @relation("primaryContact")
-  employees           Person[]      @relation("employee")
-  stakeholderIn       Audit[]       @relation("stakeholder")
-  suppliedResources   Resource[]
+  employees           Employee[]    
+  stakeholderIn       Stakeholder[] 
 
   @@unique([tenantId, shortName])
   @@unique([tenantId, fullLegalName])
+}
+
+model Stakeholder {
+  stakeholderId       String        @id @default(uuid())
+  tenantId            String
+  auditId             String
+  companyId           String
+  type                StakeholderType
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  audit               Audit         @relation(fields: [auditId], references: [auditId], onDelete: Cascade)
+  company             Company       @relation(fields: [companyId], references: [companyId])
 }
 
 model Audit {
@@ -112,7 +139,7 @@ model Audit {
   updatedAt           DateTime      @updatedAt
 
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
-  stakeholders        Company[]     @relation("stakeholder")
+  stakeholders        Stakeholder[]     
   resources           Resource[]
   scopes              Scope[]
 
@@ -123,20 +150,18 @@ model Resource {
   resourceId          String        @id @default(uuid())
   tenantId            String
   type                ResourceType
-  description         String
+  description         String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   active              Boolean       @default(true)
   activeDate          DateTime      @default(now())
-  personId            String
-  companyId           String
+  employeeId          String
   auditId             String
   assignedToId        String?    
   
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
-  person              Person        @relation(fields: [personId], references: [personId])
-  company             Company       @relation(fields: [companyId], references: [companyId])
-  audit               Audit         @relation(fields: [auditId], references: [auditId])
+  employee            Employee      @relation(fields: [employeeId], references: [employeeId])
+  audit               Audit         @relation(fields: [auditId], references: [auditId], onDelete: Cascade)
   assignedTo          Scope?        @relation(fields: [assignedToId], references: [scopeId])
 }
 
@@ -155,7 +180,7 @@ model Scope {
 
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
   resources           Resource[]
-  audit               Audit         @relation(fields: [auditId], references: [auditId])
+  audit               Audit         @relation(fields: [auditId], references: [auditId], onDelete: Cascade)
 }
 
 
@@ -197,6 +222,14 @@ enum ScopeType {
   MARKETING
   MANAGEMENT
   ADMINISTRATION
+}
+
+enum StakeholderType {
+  OPERATOR
+  AUDIT_LEAD
+  AUDIT_PARTICIPANT
+  NON_OP_OWNER
+  SERVICE_PROVIDER
 }
 
 

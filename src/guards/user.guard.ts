@@ -2,7 +2,7 @@ import { Session } from "next-auth";
 import { Role } from "@prisma/client";
 
 export function userGuard(session: Session | null): boolean {
-  if (!session?.user) return false;
+  if (!session?.user.role) return false;
 
   const roles = session.user.role as Role[];
 
