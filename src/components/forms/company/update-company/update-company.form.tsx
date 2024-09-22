@@ -1,28 +1,18 @@
 "use client";
 
-import React, { FC, useState, useEffect, use } from "react";
+import React, { FC } from "react";
 
-import { useCompanyContext } from "@/hooks/context.hook";
-import { useAlerts } from "@/state/alerts.state";
+import { useCompany } from "@/state";
 
-import { EditableField, EditableFieldError } from "@/components/editable-field";
+import { EditableField } from "@/components/editable-field";
 import {
   UpdateCompanyFormInputs,
   updateCompanySchema,
 } from "@/schemas/company.schema";
 import { serializeZodError } from "@/lib/utils";
 
-type EditCompanyFormProps = {
-  companyId: string;
-};
-
-const EditCompanyForm: FC<EditCompanyFormProps> = ({ companyId }) => {
-  const { companies, updateCompany } = useCompanyContext();
-  const [company, setCompany] = useState<Company | null>(null);
-
-  useEffect(() => {
-    setCompany(companies.find((company) => company.id === companyId) || null);
-  }, [companies, companyId]);
+const EditCompanyForm: FC = () => {
+  const { company, updateCompany } = useCompany();
 
   if (!company) {
     return null;
@@ -39,24 +29,10 @@ const EditCompanyForm: FC<EditCompanyFormProps> = ({ companyId }) => {
       };
     }
 
-    // update company
-    try {
-      const res = await updateCompany({
-        companyId: companyId,
-        companyData: validatedInputs.data,
-      });
-      if (res && !res.success) {
-        if (res.formErrors) {
-          return {
-            validationError: res.formErrors[0].message,
-          };
-        }
-      }
-    } catch (error) {
-      return {
-        errorMsg: "An error occurred while updating the company",
-      };
-    }
+    updateCompany({
+      companyId: company.companyId,
+      companyData: validatedInputs.data,
+    });
   };
 
   return (

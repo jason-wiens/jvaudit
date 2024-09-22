@@ -11,7 +11,7 @@ type LogoProps = {
 
 const Logo: FC<LogoProps> = ({
   classes = "text-normal",
-  link = true,
+  link = false,
   variant = "dark",
 }) => {
   return (

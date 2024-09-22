@@ -3,9 +3,8 @@
 import { useForm, DefaultValues } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ServerActionResponse } from "@/types/types";
-import { useTransition, useState } from "react";
-import { useAlerts } from "@/state/alerts.state";
+import { useTransition } from "react";
+import { useAlerts } from "@/state";
 
 type UseFormOptimisticActionProps<T extends Record<string, any>> = {
   schema: z.ZodType<any, any>;
@@ -21,47 +20,58 @@ export function useFormOptimistic<T extends Record<string, any>>({
   defaultValues,
 }: UseFormOptimisticActionProps<T>) {
   const { addAlert } = useAlerts();
-  const [_, startTransaction] = useTransition();
-  const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
+  const [pending, startTransaction] = useTransition();
   const {
     register,
     formState: { errors },
     trigger,
     getValues,
     reset,
-    setError,
   } = useForm<T>({
     resolver: zodResolver(schema),
     defaultValues,
   });
 
-  const handleSubmit = () =>
-    startTransaction(async () => {
-      const validationResults = await trigger();
-      if (!validationResults) return;
-      const data = getValues();
+  // const handleSubmit = async () =>
+  //   startTransaction(async () => {
+  //     const validationResults = await trigger();
+  //     if (!validationResults) return;
 
-      try {
-        // if optimistic action is provided, run it
-        action(data);
-        !!onSubmit && onSubmit();
-        setIsSubmitSuccessful(true);
-        return;
-      } catch (error) {
-        console.error(error);
-        addAlert({
-          title: "Error. Please try again.",
-          text: "Check the console for more information.",
-          type: "error",
-        });
-      }
-    });
+  //     try {
+  //       action(getValues());
+  //       !!onSubmit && onSubmit();
+  //     } catch (error) {
+  //       console.error(error);
+  //       addAlert({
+  //         title: "Error. Please try again.",
+  //         message: "Check the console for more information.",
+  //         type: "error",
+  //       });
+  //     }
+  //   });
+
+  const handleSubmit = async () => {
+    const validationResults = await trigger();
+    if (!validationResults) return;
+
+    try {
+      action(getValues());
+      !!onSubmit && onSubmit();
+    } catch (error) {
+      console.error(error);
+      addAlert({
+        title: "Error. Please try again.",
+        message: "Check the console for more information.",
+        type: "error",
+      });
+    }
+  };
 
   return {
+    pending,
     reset,
     register,
     errors,
     handleSubmit,
-    isSubmitSuccessful,
   };
 }

@@ -1,44 +1,68 @@
-export type AppRouteParams = {
-  auditId?: string;
-  companyId?: string;
-  userId?: string;
-};
+import {
+  Audit,
+  Company,
+  InformationRequest,
+  Tenant,
+  Workspace,
+} from "@prisma/client";
 
 export class AppRoutes {
+  // public routes
   static HomePage = () => "/";
   static LoginPage = () => "/auth/login";
+  static ChangePassword = () => "/auth/change-password";
   static ContactUsPage = () => "/contact";
+  static AppPage = () => "/app";
 
-  static Dashboard = () => "/app/dashboard";
-  static Audits = () => "/app/audits";
+  // super user routes
+  static SuperUserDashboard = () => "/app/su/dashboard";
+  static SuperUserTenants = () => "/app/su/tenants";
+  static SuperUserTenant = (params: { tenantId: Tenant["tenantId"] }) =>
+    `/app/su/tenants/${params.tenantId}`;
+  static SuperUserBilling = () => "/app/su/billing";
 
-  static GeneralInfo = (params: AppRouteParams) =>
-    `/app/audits/${params.auditId || "noAuditId"}/general`;
-  static AuditIRs = (params: AppRouteParams) =>
-    `/app/audits/${params.auditId || "noAuditId"}/irs`;
-  static AuditQueries = (params: AppRouteParams) =>
-    `/app/audits/${params.auditId || "noAuditId"}/queries`;
-  static AuditReport = (params: AppRouteParams) =>
-    `/app/audits/${params.auditId || "noAuditId"}/report`;
-  static AuditResponses = (params: AppRouteParams) =>
-    `/app/audits/${params.auditId || "noAuditId"}/responses`;
+  // workspace routes
+  static Dashboard = (params: { workspaceId: Workspace["workspaceId"] }) =>
+    `/app/${params.workspaceId}/dashboard`;
+  static Audits = (params: { workspaceId: Workspace["workspaceId"] }) =>
+    `/app/${params.workspaceId}/audits`;
+  static Audit = (params: {
+    workspaceId: Workspace["workspaceId"];
+    auditId: Audit["auditId"];
+  }) => `/app/${params.workspaceId}/audits/${params.auditId}`;
+  static InformationRequest = (params: {
+    workspaceId: Workspace["workspaceId"];
+    auditId: Audit["auditId"];
+    irId: InformationRequest["irId"];
+  }) => `/app/${params.workspaceId}audits/${params.auditId}/irs/${params.irId}`;
+  static Query = (params: {
+    workspaceId: Workspace["workspaceId"];
+    auditId: Audit["auditId"];
+    queryId: string;
+  }) =>
+    `/app/${params.workspaceId}/audits/${params.auditId}/queries/${params.queryId}`;
+  static Response = (params: {
+    workspaceId: Workspace["workspaceId"];
+    auditId: Audit["auditId"];
+    responseId: string;
+  }) =>
+    `/app/${params.workspaceId}/audits/${params.auditId}/queries/responses/${params.responseId}`;
 
-  static AdminDashboard = () => "/admin/dashboard";
+  // admin routes
+  static Companies = () => "/app/admin/companies";
+  static Company = (params: { companyId: Company["companyId"] }) =>
+    `/app/admin/companies/${params.companyId}`;
+  static NotificatonSettings = () => "/app/admin/notification-settings";
+  static Users = () => "/app/admin/users";
+  static Templates = () => "/app/admin/templates";
+  static Workspaces = () => "/app/admin/workspaces";
 
-  static AdminAudits = () => "/admin/audits";
-  static AdminAudit = (params: AppRouteParams) =>
-    `/admin/audits/${params.auditId || "noAuditId"}`;
+  // user routes
+  static UserNotifications = () => "/app/user-notifications";
+  static UserSettings = () => "/app/user-settings";
 
-  static AdminCompanies = () => "/admin/companies";
-  static AdminCompany = (params: AppRouteParams) =>
-    `/admin/companies/${params.companyId || "noCompanyId"}`;
-
-  static AdminUsers = () => "/admin/users";
-  static AdminUser = (params: AppRouteParams) =>
-    `/admin/users/${params.userId || "noUserId"}`;
-
-  static Forbidden = () => "/app/forbidden";
-  static NotFound = () => "/app/not-found";
-
-  static Settings = () => "/app/settings";
+  // other routes
+  static Forbidden = () => "/forbidden";
+  static NotFound = () => "/not-found";
+  static ServerError = () => "/server-error";
 }

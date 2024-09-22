@@ -27,9 +27,13 @@ model MarketingContacts {
 
 model Tenant {
   tenantId            String        @id @default(uuid())
-  name                String
+  fullLegalName       String
+  shortName           String
+  address             String?
+  billingInfo         Json
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
+
   users               User[]
   companies           Company[]
   people              Person[]
@@ -38,6 +42,40 @@ model Tenant {
   scopes              Scope[]
   employees           Employee[]
   stakeholders        Stakeholder[]
+  irs                 InformationRequest[]
+  irMessages          IrMessage[]
+  workspaces          Workspace[]
+  statistics          Statistic[]
+}
+
+model Workspace {
+  workspaceId         String        @id @default(uuid())
+  tenantId            String
+  type                WorkspaceType
+  name                String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  tenantDefault       Boolean       @default(false)
+
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  audits              Audit[]
+  statistics          Statistic[]
+  defaultForUsers     User[]
+}
+
+model Statistic {
+  id                  Int           @id @default(autoincrement())
+  tenantId            String
+  data                Json
+  function            String
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  workspaceId         String
+  userId              String
+
+  tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
+  workspace           Workspace     @relation(fields: [workspaceId], references: [workspaceId])
+  user                User          @relation(fields: [userId], references: [userId])
 }
 
 model Person {
@@ -53,7 +91,6 @@ model Person {
 
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
   employeeDetails     Employee?     
-  userDetails         User?
 
   @@unique([tenantId, email])
 }
@@ -63,16 +100,21 @@ model User {
   tenantId            String
   username            String        @unique
   password            String
+  forcePasswordChange Boolean       @default(true)
   avatarUrl           String?
-  role                Role[]        @default([USER])
+  admin               Boolean       @default(false)
+  superUser           Boolean       @default(false)
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   active              Boolean       @default(true)
   activeDate          DateTime      @default(now())
   profileId           String        @unique
+  defaultWorkspaceId  String
   
+  defaultWorkspace    Workspace     @relation(fields: [defaultWorkspaceId], references: [workspaceId])
+  statistics          Statistic[]
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
-  profile             Person        @relation(fields: [profileId], references: [personId])
+  profile             Employee      @relation(fields: [profileId], references: [employeeId])
 }
 
 model Employee {
@@ -87,10 +129,14 @@ model Employee {
   active              Boolean       @default(true)
   activeDate          DateTime      @default(now())
 
+  userDetails         User?    
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
   personalProfile     Person        @relation(fields: [personId], references: [personId])
   employerProfile     Company       @relation(fields: [companyId], references: [companyId])
   resourceFor         Resource[]
+  irsSubmitted        InformationRequest[] @relation(name: "author")
+  irsReceived         InformationRequest[] @relation(name: "submittedTo")
+  irMessages          IrMessage[]
 }
 
 model Company {
@@ -137,11 +183,17 @@ model Audit {
   activeDate          DateTime      @default(now())
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
+  fieldworkStart      DateTime?
+  fieldworkEnd        DateTime?
+  totalBudgetHours    Int?
+  workspaceId         String
 
+  workspace           Workspace     @relation(fields: [workspaceId], references: [workspaceId])
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
   stakeholders        Stakeholder[]     
   resources           Resource[]
   scopes              Scope[]
+  irs                 InformationRequest[]
 
   @@unique([tenantId, auditNumber])
 }
@@ -151,6 +203,7 @@ model Resource {
   tenantId            String
   type                ResourceType
   description         String?
+  budgetHours         Int?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   active              Boolean       @default(true)
@@ -163,6 +216,7 @@ model Resource {
   employee            Employee      @relation(fields: [employeeId], references: [employeeId])
   audit               Audit         @relation(fields: [auditId], references: [auditId], onDelete: Cascade)
   assignedTo          Scope?        @relation(fields: [assignedToId], references: [scopeId])
+
 }
 
 
@@ -170,42 +224,77 @@ model Scope {
   scopeId             String        @id @default(uuid())
   tenantId            String
   type                ScopeType
-  budget              Int
-  description         String
+  budgetHours         Int?
+  description         String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @updatedAt
   active              Boolean       @default(true)
   activeDate          DateTime      @default(now())
   auditId             String
+  fieldworkStart      DateTime?
+  fieldworkEnd        DateTime?
 
   tenant              Tenant        @relation(fields: [tenantId], references: [tenantId])
   resources           Resource[]
   audit               Audit         @relation(fields: [auditId], references: [auditId], onDelete: Cascade)
 }
 
+model InformationRequest {
+  irId               String         @id @default(uuid())
+  tenantId           String
+  auditId            String
+  number             Int
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  submittedDate      DateTime?
+  submitted          Boolean        @default(false)
+  authorId           String
+  costCenterAFE      String?
+  property           String?
+  subject            String?
+  subjectDetails     String?
+  body               String?
+  actionRequested    String?
+  grossAmount        Float          @default(0)
+  netAmount          Float          @default(0)
+  resolved           Boolean        @default(false)
+  resolvedDate       DateTime?
 
-enum Role {
-  USER
-  ADMIN
-  SUPER_USER
+  submittedTo        Employee[]      @relation(name: "submittedTo") 
+  author             Employee        @relation(name: "author", fields: [authorId], references: [employeeId])
+  tenant             Tenant          @relation(fields: [tenantId], references: [tenantId])
+  audit              Audit           @relation(fields: [auditId], references: [auditId], onDelete: Cascade)
+  correspondence     IrMessage[]
+  @@unique([auditId, number])
+}
+
+model IrMessage {
+  messageId          String         @id @default(uuid())
+  tenantId           String
+  authorId           String
+  irId               String
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  body               String
+
+  author             Employee       @relation(fields: [authorId], references: [employeeId])
+  tenant             Tenant         @relation(fields: [tenantId], references: [tenantId])
+  ir                 InformationRequest @relation(fields: [irId], references: [irId], onDelete: Cascade)
 }
 
 enum AuditStatus {
   CREATED
   CONFIRMED
-  PREPERATION
   FIELDWORK
   REPORTING
   SUBMITTED
-  RESOLVED
+  RESPONSE
   CLOSED
   CANCELLED
 }
 
 enum ResourceType {
   AUDITOR
-  PRIMARY_CONTACT_OPERATOR
-  PRIMARY_CONTACT_LEAD
   AUDIT_CONTACT_OPERATOR
   AUDIT_CONTACT_NON_OPERATOR
   MANAGER
@@ -230,6 +319,12 @@ enum StakeholderType {
   AUDIT_PARTICIPANT
   NON_OP_OWNER
   SERVICE_PROVIDER
+}
+
+enum WorkspaceType {
+  INCOMING
+  OUTGOING
+  INTERNAL
 }
 
 

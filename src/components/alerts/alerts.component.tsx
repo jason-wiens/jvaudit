@@ -3,14 +3,14 @@
 import { FC } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
-import { useAlerts } from "@/state/alerts.state";
+import { useAlerts } from "@/state";
 import { Cross1Icon } from "@radix-ui/react-icons";
 
-import { Alert } from "@/types/types";
+import type { Alert } from "@/state/alerts/types";
 
 import s from "./alerts.module.css";
 
-const Alert: FC<Alert> = ({ id, title, text, type }) => {
+const Alert: FC<Alert> = ({ id, title, message, type }) => {
   const { removeAlert } = useAlerts();
 
   return (
@@ -21,7 +21,7 @@ const Alert: FC<Alert> = ({ id, title, text, type }) => {
       exit={{ x: 50 }}
     >
       <div className={s.title}>{title}</div>
-      <div className={s.text}>{text}</div>
+      <div className={s.text}>{message}</div>
       <div className={`${s.close} ${s[type]}`} onClick={() => removeAlert(id)}>
         <Cross1Icon />
       </div>
@@ -36,8 +36,14 @@ const Alerts: FC = () => {
     <ul className={s.container}>
       <AnimatePresence>
         {alerts &&
-          alerts.map(({ id, type, title, text }) => (
-            <Alert key={id} id={id} type={type} title={title} text={text} />
+          alerts.map(({ id, type, title, message }) => (
+            <Alert
+              key={id}
+              id={id}
+              type={type}
+              title={title}
+              message={message}
+            />
           ))}
       </AnimatePresence>
     </ul>

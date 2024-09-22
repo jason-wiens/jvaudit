@@ -1,0 +1,20 @@
+.container {
+  @apply grid justify-start;
+  grid-template-columns: 1fr 3fr;
+  align-items: stretch;
+  place-content: stretch;
+}
+
+.label {
+  @apply font-semibold border-zinc-200;
+  border-bottom: 1px solid #e4e4e7;
+  border-right: 1px solid #e4e4e7;
+  padding: 0 0 16px 0;
+  margin: 0 0 16px 0;
+}
+
+.values {
+  @apply border-b border-zinc-200;
+  padding: 0 0 16px 0;
+  margin: 0 0 16px 0;
+}

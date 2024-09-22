@@ -1,6 +1,8 @@
 export type SuccessfulServerActionResponse<ResponseData> = {
   success: true;
   data?: ResponseData;
+  formErrors?: never;
+  message?: never;
 };
 
 export type FormError<T extends Record<string, any> = {}> = {
@@ -13,6 +15,7 @@ export type FailedServerActionResponse<Input extends Record<string, any> = {}> =
     success: false;
     formErrors?: FormError<Input>[];
     message?: string;
+    data?: never;
   };
 
 export type ServerActionResponse<
@@ -22,9 +25,27 @@ export type ServerActionResponse<
   | SuccessfulServerActionResponse<ResponseData>
   | FailedServerActionResponse<Input>;
 
-export type Alert = {
-  id: string;
-  type: "success" | "warning" | "error";
-  title?: string;
-  text: string;
+export type ActionCallbacks = {
+  onSuccess?: () => void;
+  onError?: () => void;
+  onSubmit?: () => void;
 };
+
+export type SuccessfulFetchResponse<Data> = {
+  success: true;
+  data: Data;
+  error?: never;
+};
+
+export type FailedFetchResponse = {
+  success: false;
+  data?: never;
+  error: {
+    unauthorized: boolean;
+    message: string;
+  };
+};
+
+export type FetchResponse<Data> =
+  | SuccessfulFetchResponse<Data>
+  | FailedFetchResponse;

@@ -1,6 +1,6 @@
 import React, { useState, FormEvent, useRef, useEffect } from "react";
 
-import { useAlerts } from "@/state/alerts.state";
+import { useAlerts } from "@/state";
 
 import { cn } from "@/lib/utils";
 
@@ -62,7 +62,7 @@ const EditableField = React.forwardRef<HTMLDivElement, EditableFieldProps>(
         addAlert({
           type: "error",
           title: "Error",
-          text: response.errorMsg,
+          message: response.errorMsg,
         });
         handleCancel();
         return;
@@ -71,7 +71,7 @@ const EditableField = React.forwardRef<HTMLDivElement, EditableFieldProps>(
       addAlert({
         type: "success",
         title: "Success",
-        text: `${name} updated successfully`,
+        message: `${name} updated successfully`,
       });
       setIsEditing(false);
     };

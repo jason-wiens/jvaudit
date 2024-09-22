@@ -1,9 +1,8 @@
 "use client";
 
-import React, { FC, useState, useEffect } from "react";
+import React, { FC } from "react";
 
-import { useAuditsContext } from "@/hooks/context.hook";
-import { useAlerts } from "@/state/alerts.state";
+import { useAdminAudit } from "@/state";
 
 import { EditableField, EditableFieldError } from "@/components/editable-field";
 import {
@@ -11,23 +10,12 @@ import {
   updateAuditSchema,
 } from "@/schemas/audits.schema";
 import { serializeZodError } from "@/lib/utils";
+import { Audit } from "@prisma/client";
 
-type UpdateAuditFormProps = {
-  auditId: string;
-};
+const UpdateAuditForm: FC = () => {
+  const { audit, updateAudit } = useAdminAudit();
 
-const UpdateAuditForm: FC<UpdateAuditFormProps> = ({ auditId }) => {
-  const { audits, updateAudit } = useAuditsContext();
-  const [audit, setAudit] = useState<Audit | null>(null);
-
-  useEffect(() => {
-    setAudit(audits.find((a) => a.id === auditId) || null);
-  }, [auditId, audits]);
-
-  if (!audit) {
-    return null;
-  }
-
+  if (!audit) return null;
   const { auditNumber, auditDescription } = audit;
 
   const handleSubmit = async (
@@ -41,24 +29,7 @@ const UpdateAuditForm: FC<UpdateAuditFormProps> = ({ auditId }) => {
       };
     }
 
-    // update company
-    try {
-      const res = await updateAudit({
-        auditId,
-        auditData: validatedInputs.data,
-      });
-      if (res && !res.success) {
-        if (res.formErrors) {
-          return {
-            validationError: res.formErrors[0].message,
-          };
-        }
-      }
-    } catch (error) {
-      return {
-        errorMsg: "An error occurred while updating the company",
-      };
-    }
+    updateAudit({ auditId: audit.auditId, auditData: inputs });
   };
 
   return (

@@ -1,23 +1,25 @@
 import React, { FC, useState } from "react";
 
-import { useFormOptimistic } from "@/hooks/use-form-optimistic.hook";
+import { useFormAsync } from "@/hooks";
 import {
-  AddEmployeeFormInputs,
-  createEmployeeSchema,
+  UpdateEmployeeFormInputs,
+  updateEmployeeSchema,
 } from "@/schemas/employee.schema";
 import {
-  AddPersonFormInputs,
-  createPersonSchema,
+  UpdatePersonFormInputs,
+  updatePersonSchema,
 } from "@/schemas/person.schema";
-import { useCompanyContext } from "@/hooks/context.hook";
+import { useCompany } from "@/state";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useStringParam } from "@/hooks/use-string-param.hook";
+
+import { Employee } from "@/state/company/types";
+import { ReloadIcon } from "@radix-ui/react-icons";
 
 type UpdateEmployeeFormProps = {
-  employee: CompanyEmployee | null;
+  employee: Employee;
   onSuccess: () => void;
   onCancel: () => void;
 };
@@ -27,27 +29,24 @@ const UpdateEmployeeForm: FC<UpdateEmployeeFormProps> = ({
   employee,
   onCancel,
 }) => {
-  const companyId = useStringParam("companyId");
-  const { updateEmployee } = useCompanyContext();
-  const { handleSubmit, register, errors, reset } = useFormOptimistic<
-    AddEmployeeFormInputs & AddPersonFormInputs
+  const { updateEmployee } = useCompany();
+  const { handleSubmit, register, errors, reset, pending } = useFormAsync<
+    UpdateEmployeeFormInputs & UpdatePersonFormInputs
   >({
-    schema: createEmployeeSchema.merge(createPersonSchema),
+    schema: updateEmployeeSchema.merge(updatePersonSchema),
     action: async (inputs) => {
-      if (!employee) return;
       return await updateEmployee({
-        companyId,
-        employeeId: employee?.id,
+        employeeId: employee.employeeId,
         employeeData: inputs,
       });
     },
-    onSubmit: onSuccess,
+    onSuccess,
     defaultValues: employee
       ? {
-          firstName: employee?.personalProfile.firstName || "",
+          firstName: employee.personalProfile.firstName,
           lastName: employee.personalProfile.lastName,
           email: employee.personalProfile.email,
-          position: employee.position,
+          position: employee.position || undefined,
         }
       : undefined,
   });
@@ -66,7 +65,7 @@ const UpdateEmployeeForm: FC<UpdateEmployeeFormProps> = ({
         <Label htmlFor="firstName" className="">
           First Name*
         </Label>
-        <Input id="firstName" {...register("firstName")} />
+        <Input id="firstName" {...register("firstName")} disabled={pending} />
         {errors.firstName && (
           <div className="text-red-500">{errors.firstName.message}</div>
         )}
@@ -75,7 +74,7 @@ const UpdateEmployeeForm: FC<UpdateEmployeeFormProps> = ({
         <Label htmlFor="lastName" className="">
           Last Name*
         </Label>
-        <Input id="lastName" {...register("lastName")} />
+        <Input id="lastName" {...register("lastName")} disabled={pending} />
         {errors.lastName && (
           <div className="text-red-500">{errors.lastName.message}</div>
         )}
@@ -84,7 +83,7 @@ const UpdateEmployeeForm: FC<UpdateEmployeeFormProps> = ({
         <Label htmlFor="email" className="">
           Email
         </Label>
-        <Input id="address" {...register("email")} />
+        <Input id="address" {...register("email")} disabled={pending} />
         {errors.email && (
           <div className="text-red-500">{errors.email.message}</div>
         )}
@@ -93,7 +92,7 @@ const UpdateEmployeeForm: FC<UpdateEmployeeFormProps> = ({
         <Label htmlFor="position" className="">
           Position
         </Label>
-        <Input id="position" {...register("position")} />
+        <Input id="position" {...register("position")} disabled={pending} />
         {errors.position && (
           <div className="text-red-500">{errors.position.message}</div>
         )}
@@ -107,11 +106,19 @@ const UpdateEmployeeForm: FC<UpdateEmployeeFormProps> = ({
             reset();
             onCancel();
           }}
+          disabled={pending}
         >
           Cancel
         </Button>
         <Button type="submit" variant="add" size="sm">
-          Update Employee
+          {pending ? (
+            <>
+              <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
+              <span className="">Adding</span>
+            </>
+          ) : (
+            "Add Employee"
+          )}
         </Button>
       </div>
     </form>

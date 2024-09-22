@@ -17,7 +17,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { addCompany } from "@/actions/companies/add-company";
+import { addCompany } from "@/state/companies/actions/add-company";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 type AddCompanyFormProps = {
@@ -123,7 +123,7 @@ const AddCompany: FC<AddCompanyFormProps> = ({ onCancel, onSuccess }) => {
       <p className="italic mb-8 text-sm">* Required</p>
       <div className="flex gap-2 justify-end">
         <Button
-          variant="secondary"
+          variant="ghost"
           size="sm"
           disabled={pending}
           onClick={() => {

@@ -1,3 +1,5 @@
+"use client";
+
 import { FC, useState } from "react";
 
 import { AddEmployeeForm } from "@components/forms/employee/add-employee";
@@ -11,14 +13,17 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { useCompany } from "@/state";
 
 type AddEmployeeProps = {
   children: React.ReactNode;
-  companyId: string;
 };
 
-const AddEmployee: FC<AddEmployeeProps> = ({ children, companyId }) => {
+const AddEmployee: FC<AddEmployeeProps> = ({ children }) => {
+  const { company } = useCompany();
   const [open, setOpen] = useState(false);
+
+  if (!company) return null;
 
   return (
     <Dialog open={open} onOpenChange={(open) => setOpen(open)}>
@@ -32,7 +37,7 @@ const AddEmployee: FC<AddEmployeeProps> = ({ children, companyId }) => {
           <DialogClose />
         </DialogHeader>
         <AddEmployeeForm
-          companyId={companyId}
+          companyId={company.companyId}
           onCancel={() => setOpen(false)}
           onSuccess={() => setOpen(false)}
         />

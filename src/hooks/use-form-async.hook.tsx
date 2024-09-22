@@ -5,23 +5,29 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { ServerActionResponse } from "@/types/types";
 import { useTransition, useState } from "react";
-import { useAlerts } from "@/state/alerts.state";
+import { useAlerts } from "@/state";
 
-type UseFormActionProps<T extends Record<string, any>> = {
+type UseFormActionProps<
+  Input extends Record<string, any>,
+  Data extends Record<string, any> | void = void
+> = {
   schema: z.ZodType<any, any>;
-  action: (inputs: T) => Promise<ServerActionResponse<T>>;
-  onSuccess?: () => void;
+  action: (inputs: Input) => Promise<ServerActionResponse<Input, Data>>;
+  onSuccess?: (data: Data) => void;
   onError?: () => void;
-  defaultValues?: DefaultValues<T>;
+  defaultValues?: DefaultValues<Input>;
 };
 
-export function useFormAsync<T extends Record<string, any>>({
+export function useFormAsync<
+  Input extends Record<string, any>,
+  Data extends Record<string, any> | void = void
+>({
   schema,
   onSuccess,
   onError,
   action,
   defaultValues,
-}: UseFormActionProps<T>) {
+}: UseFormActionProps<Input, Data>) {
   const { addAlert } = useAlerts();
   const [pending, startTransaction] = useTransition();
   const [isSubmitSuccessful, setIsSubmitSuccessful] = useState(false);
@@ -32,7 +38,7 @@ export function useFormAsync<T extends Record<string, any>>({
     getValues,
     reset,
     setError,
-  } = useForm<T>({
+  } = useForm<Input>({
     resolver: zodResolver(schema),
     defaultValues,
   });
@@ -48,7 +54,9 @@ export function useFormAsync<T extends Record<string, any>>({
         if (results.success) {
           setIsSubmitSuccessful(true);
           reset();
-          if (onSuccess) onSuccess();
+          if (onSuccess) {
+            onSuccess(results.data || ({} as Data));
+          }
         } else {
           const { formErrors, message } = results;
           if (formErrors) {
@@ -60,7 +68,7 @@ export function useFormAsync<T extends Record<string, any>>({
           if (message)
             addAlert({
               title: "Error",
-              text: message,
+              message: message,
               type: "error",
             });
           if (onError) onError();
@@ -69,7 +77,7 @@ export function useFormAsync<T extends Record<string, any>>({
         console.error(error);
         addAlert({
           title: "Error. Please try again.",
-          text: "Check the console for more information.",
+          message: "Check the console for more information.",
           type: "error",
         });
       }

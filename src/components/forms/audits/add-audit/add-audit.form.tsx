@@ -1,12 +1,14 @@
+"use client";
+
 import { FC } from "react";
 
 import { useFormAsync } from "@/hooks/use-form-async.hook";
 import { createAuditSchema, AddAuditFormInputs } from "@/schemas/audits.schema";
+import { useAdminAudits } from "@/state";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { addAudit } from "@/actions/audits";
 import { ReloadIcon } from "@radix-ui/react-icons";
 
 type AddAuditFormProps = {
@@ -15,6 +17,7 @@ type AddAuditFormProps = {
 };
 
 const AddAuditForm: FC<AddAuditFormProps> = ({ onCancel, onSuccess }) => {
+  const { addAudit } = useAdminAudits();
   const { handleSubmit, register, errors, pending, reset } =
     useFormAsync<AddAuditFormInputs>({
       schema: createAuditSchema,

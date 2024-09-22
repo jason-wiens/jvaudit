@@ -1,10 +1,21 @@
-import { Prisma, PrismaClient } from "@prisma/client";
+import { PrismaClient, WorkspaceType } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
 const tenantData = {
-  name: "dev",
+  fullLegalName: "Integrity Technology Services",
+  shortName: "ITS",
+  address: "127 Dalcastle Close NW",
+  billingInfo: {
+    contactName: "Jason Wiens",
+    instructions: "Its free for me",
+  },
+};
+
+const workspaceData = {
+  type: WorkspaceType.OUTGOING,
+  name: "App Admin",
 };
 
 const companyData = {
@@ -19,59 +30,93 @@ const personData = {
   email: "jwiens@integrity-audit.com",
 };
 
+const employeeData = {
+  primaryContact: true,
+  position: "Super User",
+};
+
 const userData = {
   username: "jasonwiens",
-  password: "password",
-  role: ["USER", "ADMIN", "SUPER_USER"],
+  password: "",
+  admin: true,
+  superUser: true,
+  forcePasswordChange: false,
 };
 
 async function main() {
-  const tenant = await prisma.tenant.create({ data: tenantData });
+  await prisma.$transaction(async (prisma) => {
+    const tenant = await prisma.tenant.create({
+      data: {
+        ...tenantData,
+      },
+    });
 
-  const company = await prisma.company.create({
-    data: {
-      ...companyData,
-      tenant: {
-        connect: {
-          tenantId: tenant.tenantId,
+    const workspace = await prisma.workspace.create({
+      data: {
+        ...workspaceData,
+        tenantDefault: true,
+        tenant: {
+          connect: {
+            tenantId: tenant.tenantId,
+          },
         },
       },
-    },
-  });
+    });
 
-  const person = await prisma.person.create({
-    data: {
-      ...personData,
-      tenant: {
-        connect: {
-          tenantId: tenant.tenantId,
+    const company = await prisma.company.create({
+      data: {
+        companyId: tenant.tenantId,
+        ...companyData,
+        tenant: {
+          connect: {
+            tenantId: tenant.tenantId,
+          },
         },
       },
-      employeeOf: {
-        connect: {
-          companyId: company.companyId,
-        },
-      },
-    },
-  });
+    });
 
-  const hashedPassword = await bcrypt.hash(userData.password, 10);
-  const user = await prisma.user.create({
-    data: {
-      ...userData,
-      role: ["USER", "ADMIN", "SUPER_USER"],
-      password: hashedPassword,
-      profile: {
-        connect: {
-          personId: person.personId,
+    const hashedPassword = await bcrypt.hash(userData.password, 10);
+    const user = await prisma.user.create({
+      data: {
+        ...userData,
+        password: hashedPassword,
+        defaultWorkspace: {
+          connect: {
+            workspaceId: workspace.workspaceId,
+          },
+        },
+        profile: {
+          create: {
+            ...employeeData,
+            employerProfile: {
+              connect: {
+                companyId: company.companyId,
+              },
+            },
+            tenant: {
+              connect: {
+                tenantId: tenant.tenantId,
+              },
+            },
+            personalProfile: {
+              create: {
+                ...personData,
+                tenant: {
+                  connect: {
+                    tenantId: tenant.tenantId,
+                  },
+                },
+              },
+            },
+          },
+        },
+        tenant: {
+          connect: {
+            tenantId: tenant.tenantId,
+          },
         },
       },
-      tenant: {
-        connect: {
-          tenantId: tenant.tenantId,
-        },
-      },
-    },
+    });
   });
 }
 

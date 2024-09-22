@@ -1,52 +1,72 @@
 "use client";
 
+import { useState } from "react";
 import { Logo } from "@components/logo";
 import { Label } from "@components/ui/label";
 import { Input } from "@components/ui/input";
 import { Button } from "@components/ui/button";
 import { Textarea } from "../ui/textarea";
 import { ReloadIcon } from "@radix-ui/react-icons";
-
+import { addSubscriber } from "@/state/public/actions/addMarketingSubscriber";
 import {
   subscriberSchema,
   SubscriberFormInputs,
 } from "@schemas/subscriber.schema";
-import { addSubscriber } from "@/actions/website/addMarketingSubscriber";
-import { useFormAction } from "@/hooks/use-form-optimistic.hook";
 
-export function Subscribe() {
-  const { register, handleSubmit, errors, pending, isSubmitSuccessful } =
-    useFormAction<SubscriberFormInputs>({
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
+import { useFormAsync } from "@/hooks/use-form-async.hook";
+
+export function Subscribe({ children }: { children: React.ReactNode }) {
+  const [open, setOpen] = useState(false);
+  const { register, handleSubmit, errors, pending, isSubmitSuccessful, reset } =
+    useFormAsync<SubscriberFormInputs>({
       schema: subscriberSchema,
       action: addSubscriber,
+      onSuccess: () => {
+        setOpen(false);
+      },
     });
 
+  const handleOpenChange = (open: boolean) => {
+    if (open) {
+      reset();
+    }
+    setOpen(open);
+  };
+
   return (
-    <div className="w-full flex flex-col justify-center items-center bg-gray-100 p-16">
-      <div className="mb-8 text-center">
-        <span className="font-bold">
-          <Logo />
-        </span>{" "}
-        is currently in closed beta for invite only.
-        <br />
-        To follow our progress or to get on the beta waitlist please subscribe
-        below:
-      </div>
-      {isSubmitSuccessful ? (
-        <div className="text-center">
-          <div className="text-2xl font-bold text-secondary-500">
-            Thank you!
-          </div>
-          <div className="">We will be in touch soon.</div>
-        </div>
-      ) : (
+    <Dialog open={open} onOpenChange={handleOpenChange}>
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle className="text-xl mb-3 pt-2">
+            Subscribe / Contact Us
+          </DialogTitle>
+          <DialogDescription>
+            Please fill out the form below and we will send you periodic updates
+            on our progress. We will never share your information with anyone.
+            If you would like to know more about jvaudit.io please indicate so
+            in the comment section andy we will reach out to you as soon as
+            posible. Thanks!
+          </DialogDescription>
+          <DialogClose />
+        </DialogHeader>
         <form
           className="w-full max-w-md flex flex-col gap-2"
           action={handleSubmit}
         >
           <div className="space-y-1">
             <Label htmlFor="name" className="">
-              Name
+              Name *
             </Label>
             <Input id="name" {...register("name")} disabled={pending} />
             {errors.name && (
@@ -55,7 +75,7 @@ export function Subscribe() {
           </div>
           <div className="space-y-1">
             <Label htmlFor="email" className="">
-              Email
+              Email *
             </Label>
             <Input id="email" {...register("email")} disabled={pending} />
             {errors.email && (
@@ -64,7 +84,7 @@ export function Subscribe() {
           </div>
           <div className="space-y-1">
             <Label htmlFor="company" className="">
-              Company
+              Company *
             </Label>
             <Input id="company" {...register("company")} disabled={pending} />
             {errors.company && (
@@ -85,20 +105,32 @@ export function Subscribe() {
               <p className="text-red-500 text-sm">{errors.comments.message}</p>
             )}
           </div>
-          <div className="flex justify-end mt-8">
-            <Button type="submit" variant="accent">
+          <p className="italic text-zinc-800 text-sm">* Required</p>
+          <div className="flex gap-2 justify-end pt-8">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={pending}
+              onClick={() => {
+                reset();
+                setOpen(false);
+              }}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="add" size="sm">
               {pending ? (
                 <>
                   <ReloadIcon className="mr-2 h-4 w-4 animate-spin" />
-                  Submitting...
+                  <span className="">Sending...</span>
                 </>
               ) : (
-                "Subscribe"
+                "Subscribe / Send"
               )}
             </Button>
           </div>
         </form>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }

@@ -9,7 +9,7 @@ import {
   AddPersonFormInputs,
   createPersonSchema,
 } from "@/schemas/person.schema";
-import { useCompanyContext } from "@/hooks/context.hook";
+import { useCompany } from "@/state";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -27,7 +27,7 @@ const AddEmployeeForm: FC<AddEmployeeFormProps> = ({
   onCancel,
   onSuccess,
 }) => {
-  const { addEmployee } = useCompanyContext();
+  const { addEmployee } = useCompany();
   const { handleSubmit, register, errors, pending, reset } = useFormAsync<
     AddEmployeeFormInputs & AddPersonFormInputs
   >({
@@ -87,7 +87,7 @@ const AddEmployeeForm: FC<AddEmployeeFormProps> = ({
       <p className="italic mb-8 text-sm">* Required</p>
       <div className="flex gap-2 justify-end">
         <Button
-          variant="secondary"
+          variant="ghost"
           size="sm"
           disabled={pending}
           onClick={() => {

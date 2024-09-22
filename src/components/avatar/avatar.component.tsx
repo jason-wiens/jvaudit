@@ -3,6 +3,7 @@ import Image from "next/image";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 import { User } from "next-auth/types";
+import { Person } from "@prisma/client";
 
 const avatarVariants = cva(
   "rounded-full flex items-center justify-center overflow-hidden uppercase font-semibold",
@@ -30,12 +31,21 @@ const avatarVariants = cva(
 export interface AvatarProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof avatarVariants> {
-  user: User;
+  user:
+    | User
+    | (Person & { avatarUrl?: never })
+    | {
+        firstName: string;
+        lastName: string;
+        email: string;
+        avatarUrl?: string;
+      };
   className?: string;
+  showDetails?: boolean;
 }
 
 const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
-  ({ user, variant, size, className, ...props }, ref) => {
+  ({ user, variant, size, className, showDetails = false, ...props }, ref) => {
     if (!user)
       return (
         <div
@@ -46,7 +56,7 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
       );
 
     return (
-      <>
+      <div className="flex gap-2 items-center">
         {user.avatarUrl ? (
           <Image
             src={user.avatarUrl}
@@ -68,7 +78,15 @@ const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
             {user.lastName.charAt(0)}
           </div>
         )}
-      </>
+        {showDetails && (
+          <div className="flex flex-col">
+            <div className="font-semibold">
+              {`${user.firstName} ${user.lastName}`}
+            </div>
+            <div className="text-sm text-zinc-500">{user.email}</div>
+          </div>
+        )}
+      </div>
     );
   }
 );

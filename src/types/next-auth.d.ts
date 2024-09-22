@@ -9,9 +9,13 @@ declare module "next-auth" {
     lastName: string;
     email: string;
     avatarUrl: string | null;
-    role: Role[];
+    isAdmin: boolean;
+    isSuperUser: boolean;
     tenantId: string;
-    tenantName: string;
+    employeeId: string;
+    companyId: string;
+    defaultWorkspaceId: string;
+    forcePasswordChange: boolean;
   }
 
   interface Session {
@@ -27,8 +31,12 @@ declare module "@auth/core/jwt" {
     lastName: string;
     email: string;
     avatarUrl: string;
-    role: Role[];
+    isAdmin: boolean;
+    isSuperUser: boolean;
     tenantId: string;
-    tenantName: string;
+    employeeId: string;
+    companyId: string;
+    defaultWorkspaceId: string;
+    forcePasswordChange: boolean;
   }
 }

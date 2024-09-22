@@ -7,9 +7,21 @@ import { Avatar } from "@/components/avatar";
 import { Logo } from "@/components/logo";
 import UserMenu from "./user-menu.component";
 
-const HeaderApp: FC = () => {
+type HeaderAppProps = {
+  loading?: boolean;
+};
+
+const HeaderApp: FC<HeaderAppProps> = ({ loading = false }) => {
   const [menuOpen, toggleMenuOpen] = useState(false);
   const { data: session, status } = useSession();
+
+  if (loading) {
+    return (
+      <header className="w-full flex justify-between items-center px-6 py-2 bg-primary-900">
+        <Logo variant="white" />
+      </header>
+    );
+  }
 
   return (
     <header className="w-full flex justify-between items-center px-6 py-2 bg-primary-900">

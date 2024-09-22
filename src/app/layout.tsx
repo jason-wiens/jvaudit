@@ -3,6 +3,7 @@ import { SessionProvider } from "next-auth/react";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 import "@styles/globals.css";
+import { AlertContextProvider } from "@/state";
 
 const inter = Roboto({
   weight: ["100", "300", "400", "500", "700", "900"],
@@ -22,7 +23,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${inter.className} text-zinc-900 text-base`}>
-        <SessionProvider>{children}</SessionProvider>
+        <SessionProvider>
+          <AlertContextProvider>{children}</AlertContextProvider>
+        </SessionProvider>
       </body>
     </html>
   );
