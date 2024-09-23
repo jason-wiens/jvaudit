@@ -6,12 +6,14 @@ import {
   UpdateAuditFormInputs,
 } from "@/schemas/audits.schema";
 import type { ServerActionResponse } from "@/types/types";
-import { Audit } from "@prisma/client";
+import { Audit, Prisma } from "@prisma/client";
 import { serializeZodError } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import { logAction, logError } from "@/lib/logging";
 import { isValidUUID } from "@/lib/utils";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type UpdateAuditInput = {
   auditId: Audit["auditId"];
@@ -65,17 +67,29 @@ export async function updateAudit({
     });
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      if (error.code === "P2002") {
+        const uniqueConstraint = (error.meta?.target as string[]) || [];
+        if (uniqueConstraint.includes("auditNumber")) {
+          return {
+            success: false,
+            formErrors: [
+              {
+                field: "auditNumber",
+                message: "Audit number already exists",
+              },
+            ],
+          };
+        }
+      }
+    }
+
+    return handleServerError({
       error,
-      message: `Error updating audit: ${validatedInputs.data.auditNumber}`,
+      message: "Unable to update audit",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the audit",
-    };
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

@@ -1,17 +1,13 @@
 "use server";
 
-import { Prisma } from "@prisma/client";
 import prisma from "@lib/db";
 import type { ServerActionResponse } from "@/types/types";
 import { checkAuthorized } from "@/permissions";
-import {
-  serializeZodError,
-  getNextAvailableInteger,
-  cleanUndefinedFields,
-} from "@/lib/utils";
-import { logError, logAction } from "@/lib/logging";
+
+import { logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
-import sanitizeHtml from "sanitize-html";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function deleteInformationRequest(
   irId: string
@@ -52,18 +48,14 @@ export async function deleteInformationRequest(
       type: "delete",
       message: `Deleted IR ${ir.number} for audit ${ir.audit.auditNumber}`,
     });
-    revalidatePath("/app/audits/[auditId]", "layout");
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Unable to delete IR ${irId}`,
+      message: "Failed to delete information request",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while deleting the Information Request",
-    };
+  } finally {
+    revalidatePath(AppRoutes.InformationRequest(), "page");
   }
 }

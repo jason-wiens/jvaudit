@@ -44,6 +44,7 @@ export default function CompanyPage() {
           <DataTable
             columns={employeeColumns}
             data={company?.employees || []}
+            rowIdKey="employeeId"
           />
         </Card>
       </div>

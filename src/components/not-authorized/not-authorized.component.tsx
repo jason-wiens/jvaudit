@@ -3,6 +3,7 @@
 import React, { useEffect } from "react";
 import { useAlerts } from "@/state";
 import { useRouter } from "next/router";
+import { AppRoutes } from "@/lib/routes.app";
 
 const NotAuthorized = () => {
   const { addAlert } = useAlerts();
@@ -11,10 +12,10 @@ const NotAuthorized = () => {
   useEffect(() => {
     addAlert({
       title: "Not Authorized",
-      text: "You are not authorized to view this page",
+      message: "You are not authorized to view this page",
       type: "error",
     });
-    router.back();
+    router.push(AppRoutes.Forbidden());
   }, []);
 
   return <div>NotAuthorized</div>;

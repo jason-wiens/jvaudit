@@ -8,6 +8,8 @@ import { serializeZodError } from "@/lib/utils";
 import { UpdateCompanyFormInputs } from "@/schemas/company.schema";
 import { revalidatePath } from "next/cache";
 import { logAction, logError } from "@/lib/logging";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type UpdateCompanyInputs = {
   companyId: string;
@@ -53,18 +55,14 @@ export async function updateCompany({
       type: "update",
       message: `Company updated: ${companyId}`,
     });
-    revalidatePath("/admin", "layout");
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Error updating company: ${companyId}`,
+      message: "Failed to update company",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the company",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Company(), "page");
   }
 }

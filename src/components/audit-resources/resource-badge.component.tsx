@@ -1,9 +1,9 @@
 import React from "react";
 
 import { Badge } from "../badge";
-import type { Resource } from "./audit-resource.types";
-import { formatResourceType } from "@/lib/formatters/audit-resource.formatter";
+import type { Resource } from "@/state/audit/types";
 import { ResourceType } from "@prisma/client";
+import { beautifyEnumTerm } from "@/lib/beautify-enums";
 
 type ResourceBadgeProps = {
   resource: Resource;
@@ -36,7 +36,7 @@ export const ResourceBadge: React.FC<ResourceBadgeProps> = ({
   return (
     <Badge
       onDelete={() => !!onDelete && onDelete(resourceId)}
-      label={formatResourceType(type)}
+      label={beautifyEnumTerm(type)}
       variant={variantType(type)}
     >
       <div className="w-1 h-full bg-secondary-500"></div>

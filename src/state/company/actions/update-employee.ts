@@ -17,6 +17,8 @@ import { revalidatePath } from "next/cache";
 import { cleanUndefinedFields } from "@/lib/utils";
 import { logAction, logError } from "@/lib/logging";
 import { log } from "console";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type UpdateEmployeeInputs = {
   employeeId: string;
@@ -88,27 +90,18 @@ export async function updateEmployee({
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        logError({
-          timestamp: new Date(),
-          user: session.user,
-          message: `Tried changing email to an email that already exists: ${email}`,
-          error,
-        });
         return {
           success: false,
           message: "The email is already in use",
         };
       }
     }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      message: `An error occurred while updating employee: ${employeeId}`,
+    return handleServerError({
       error,
+      message: "Failed to update employee",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the company",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Company(), "page");
   }
 }

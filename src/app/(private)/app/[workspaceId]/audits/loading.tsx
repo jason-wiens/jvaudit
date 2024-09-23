@@ -1,7 +1,7 @@
 import { TopBar } from "@/components/top-bar";
 import { Building } from "lucide-react";
 
-import { userAuditsTableColumns } from "../../../../../components/tables/audits.table";
+import { auditsTableColumns } from "@/components/tables/audits.table";
 import { SkeletonTable } from "@/components/data-table";
 
 export default function Loading() {
@@ -14,7 +14,7 @@ export default function Loading() {
         </div>
       </TopBar>
       <div className="p-8 w-full max-w-container mx-auto">
-        <SkeletonTable columns={userAuditsTableColumns} />
+        <SkeletonTable columns={auditsTableColumns} />
       </div>
     </div>
   );

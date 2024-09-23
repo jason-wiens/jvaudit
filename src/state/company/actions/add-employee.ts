@@ -15,6 +15,8 @@ import { checkAdmin } from "@/permissions";
 import { serializeZodError } from "@/lib/utils";
 import { logAction, logError } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function addEmployee(
   inputs: AddEmployeeFormInputs & AddPersonFormInputs & { companyId: string }
@@ -76,12 +78,6 @@ export async function addEmployee(
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
-        logError({
-          timestamp: new Date(),
-          user: session.user,
-          error,
-          message: `An employee with that email already exists.`,
-        });
         return {
           success: false,
           formErrors: [
@@ -93,17 +89,12 @@ export async function addEmployee(
         };
       }
     }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `An error occurred while adding an employee.`,
+      message: "Failed to add Employee",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the employee",
-    };
   } finally {
-    revalidatePath("/admin", "layout");
+    revalidatePath(AppRoutes.Company(), "page");
   }
 }

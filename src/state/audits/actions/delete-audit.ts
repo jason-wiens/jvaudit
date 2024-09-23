@@ -5,12 +5,17 @@ import type { ServerActionResponse } from "@/types/types";
 import { checkAdmin } from "@/permissions";
 import { revalidatePath } from "next/cache";
 import { logError, logAction } from "@/lib/logging";
+import { Prisma } from "@prisma/client";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type DeleteAuditInputs = {
   auditId: string;
+  workspaceId: string;
 };
 
 export async function deleteAudit({
+  workspaceId,
   auditId,
 }: DeleteAuditInputs): Promise<ServerActionResponse> {
   // check permissions
@@ -35,12 +40,42 @@ export async function deleteAudit({
         where: { auditId, tenantId },
       });
     } else {
-      await prisma.audit.update({
-        where: { auditId, tenantId },
-        data: {
-          active: false,
-          activeDate: new Date(),
-        },
+      await prisma.$transaction(async (prisma) => {
+        // 1. Update the Audit to set active: false
+        await prisma.audit.update({
+          where: { auditId },
+          data: {
+            active: false,
+            activeDate: new Date(),
+          },
+        });
+
+        // 2. Update all Resources associated with the Audit to set active: false
+        await prisma.resource.updateMany({
+          where: { auditId },
+          data: {
+            active: false,
+            activeDate: new Date(),
+          },
+        });
+
+        // 3. Update all Scopes associated with the Audit to set active: false
+        await prisma.scope.updateMany({
+          where: { auditId },
+          data: {
+            active: false,
+            activeDate: new Date(),
+          },
+        });
+
+        // 4. Update all IRs associated with the Audit to set active: false
+        await prisma.informationRequest.updateMany({
+          where: { auditId },
+          data: {
+            active: false,
+            activeDate: new Date(),
+          },
+        });
       });
     }
 
@@ -53,15 +88,12 @@ export async function deleteAudit({
     revalidatePath("/admin", "layout");
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Error deleting company: ${auditId}`,
+      message: "Failed to delete / deactivate audit",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while deleting the audit",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Audits(), "page");
   }
 }

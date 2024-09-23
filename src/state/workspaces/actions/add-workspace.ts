@@ -9,6 +9,7 @@ import prisma from "@lib/db";
 import { revalidatePath } from "next/cache";
 import { AppRoutes } from "@/lib/routes.app";
 import { ServerActionResponse } from "@/types/types";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export const addWorkspace = async (
   inputs: AddWorkspaceFormInputs
@@ -54,17 +55,11 @@ export const addWorkspace = async (
       success: true,
     };
   } catch (error) {
-    const message = `Error Creating Workspace: ${validatedInputs.data.name}`;
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
       error,
-      message,
+      message: "Failed to add workspace",
     });
-    return {
-      success: false,
-      message,
-    };
   } finally {
     revalidatePath(AppRoutes.Workspaces(), "page");
   }

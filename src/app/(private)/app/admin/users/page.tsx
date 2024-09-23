@@ -14,6 +14,7 @@ import { UsersTable } from "@/components/tables";
 import { AddUser } from "@/components/add-user";
 import { Session } from "next-auth/types";
 import { DefaultIcons } from "@/lib/default-icons";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 type UsersPageProps = {
   session: Session;
@@ -45,12 +46,10 @@ const UsersPage: FC<UsersPageProps> = async ({ session: { user } }) => {
       </UsersContextProvider>
     );
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Unknown error";
-    logError({
+    const { message } = handleServerError({
       error,
+      message: "Failed to get users",
       user,
-      timestamp: new Date(),
-      message,
     });
     return <ServerError message={message} />;
   }

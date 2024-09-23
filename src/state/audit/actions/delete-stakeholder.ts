@@ -7,6 +7,8 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { uuidRegex } from "@/lib/utils";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 const deleteStakeholderParams = z.object({
   stakeholderId: z
@@ -59,7 +61,6 @@ export async function deleteStakeholder(
       await prisma.stakeholder.delete({
         where: { stakeholderId, tenantId },
       });
-      revalidatePath("/admin/audits/[auditId]", "page");
       return { success: true };
     } else {
       return {
@@ -69,11 +70,12 @@ export async function deleteStakeholder(
       };
     }
   } catch (error) {
-    return {
-      success: false,
-      message: "An error occurred while deleting the stakeholder",
-    };
+    return handleServerError({
+      error,
+      user: session.user,
+      message: "Error deleting stakeholder",
+    });
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

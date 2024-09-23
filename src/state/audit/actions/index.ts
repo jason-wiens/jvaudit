@@ -1,5 +1,4 @@
-export { getAdminAuditDbQuery } from "./get-audit";
-export { getAdminAudit } from "./get-audit";
+export { getAudit } from "./get-audit";
 export { updateAudit } from "./update-audit";
 export { addStakeholder } from "./add-stakeholder";
 export { deleteStakeholder } from "./delete-stakeholder";

@@ -53,5 +53,6 @@ const TopBar = React.forwardRef<HTMLDivElement, TopBarProps>(
     );
   }
 );
+TopBar.displayName = "TopBar";
 
 export default TopBar;

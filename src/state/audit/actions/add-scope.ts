@@ -8,6 +8,8 @@ import { AddScopeFormInputs, createScopeSchema } from "@/schemas/scope.schema";
 import { serializeZodError } from "@/lib/utils";
 import { logAction, logError } from "@/lib/logging";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function addScope(
   inputs: AddScopeFormInputs
@@ -25,12 +27,6 @@ export async function addScope(
   // validate inputs
   const validatedInputs = createScopeSchema.safeParse(inputs);
   if (!validatedInputs.success) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      error: validatedInputs.error,
-      message: `Error validating inputs: ${JSON.stringify(inputs, null, 2)}`,
-    });
     return {
       success: false,
       formErrors: serializeZodError(validatedInputs.error),
@@ -68,18 +64,12 @@ export async function addScope(
     });
     return { success: true };
   } catch (error) {
-    const message = `Error adding scope: ${type} to audit: ${auditId}`;
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      user: session.user,
+      message: "Error adding scope",
     });
-    return {
-      success: false,
-      message,
-    };
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

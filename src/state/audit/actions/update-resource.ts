@@ -10,6 +10,8 @@ import {
 import { isValidUUID, serializeZodError } from "@/lib/utils";
 import { logAction, logError } from "@/lib/logging";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type UpdateResourceInput = {
   resourceId: string;
@@ -43,16 +45,6 @@ export async function updateResource({
   // validate inputs
   const validatedInputs = updateResourceSchema.safeParse(resourceData);
   if (!validatedInputs.success) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      error: validatedInputs.error,
-      message: `Error validating inputs: ${JSON.stringify(
-        resourceData,
-        null,
-        2
-      )}`,
-    });
     return {
       success: false,
       formErrors: serializeZodError(validatedInputs.error),
@@ -77,18 +69,12 @@ export async function updateResource({
     });
     return { success: true };
   } catch (error) {
-    const message = `Error updating resource: ${resourceId}`;
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      user: session.user,
+      message: "Error updating resource",
     });
-    return {
-      success: false,
-      message,
-    };
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

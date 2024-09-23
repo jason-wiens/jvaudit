@@ -11,6 +11,7 @@ import { revalidatePath } from "next/cache";
 import { generateStrongPassword } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export async function addUser(
   userData: AddUserFormInputs
@@ -82,7 +83,6 @@ export async function addUser(
       type: "add",
       message: `User created: ${validatedInputs.data.username}`,
     });
-    revalidatePath(AppRoutes.Users(), "page");
     return { success: true, data: { password } };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -95,28 +95,18 @@ export async function addUser(
             message: "Username already exists",
           });
         }
-        logError({
-          timestamp: new Date(),
-          user: session.user,
-          error,
-          message: `Error creating user. Username "${validatedInputs.data.username}" already exists`,
-        });
         return {
           success: false,
           formErrors,
         };
       }
     }
-    const message = `Error Creating User: ${validatedInputs.data.username}`;
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
       error,
-      message,
+      message: "Failed to add user",
     });
-    return {
-      success: false,
-      message,
-    };
+  } finally {
+    revalidatePath(AppRoutes.Users(), "page");
   }
 }

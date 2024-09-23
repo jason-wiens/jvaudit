@@ -11,6 +11,8 @@ import {
 } from "@/schemas/resource.schema";
 import { serializeZodError } from "@/lib/utils";
 import { logAction, logError } from "@/lib/logging";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function addResource(
   inputs: AddResourceFormInputs
@@ -28,12 +30,6 @@ export async function addResource(
   // validate inputs
   const validatedInputs = createResourceSchema.safeParse(inputs);
   if (!validatedInputs.success) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      error: validatedInputs.error,
-      message: `Error validating inputs: ${JSON.stringify(inputs, null, 2)}`,
-    });
     return {
       success: false,
       formErrors: serializeZodError(validatedInputs.error),
@@ -88,17 +84,12 @@ export async function addResource(
     });
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Error adding resource: ${employeeId} to audit: ${auditId}`,
+      user: session.user,
+      message: "Error adding resource",
     });
-    return {
-      success: false,
-      message: `Error adding resource: ${employeeId} to audit: ${auditId}`,
-    };
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

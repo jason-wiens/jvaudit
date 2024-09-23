@@ -19,6 +19,8 @@ import { checkAdmin } from "@/permissions";
 import { serializeZodError } from "@/lib/utils";
 import { logError, logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type AddCompanyInputs = AddCompanyFormInputs &
   AddEmployeeFormInputs &
@@ -97,7 +99,6 @@ export async function addCompany(
       type: "add",
       message: `Company added: ${validatedInputs.data.fullLegalName}`,
     });
-    revalidatePath("/admin", "layout");
     return { success: true };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
@@ -116,29 +117,18 @@ export async function addCompany(
             message: "Full legal name already exists",
           });
         }
-        logError({
-          timestamp: new Date(),
-          user: session.user,
-          error,
-          message: `Error adding company, violated unique constraints: ${uniqueConstraint.join(
-            ", "
-          )}`,
-        });
         return {
           success: false,
           formErrors,
         };
       }
     }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Unable to create company: ${validatedInputs.data.fullLegalName}`,
+      message: "Unable to add company",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the company",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Companies(), "page");
   }
 }

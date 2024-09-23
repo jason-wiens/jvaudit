@@ -11,6 +11,7 @@ import { logError } from "@/lib/logging";
 import { ServerError } from "@/components/server-error";
 import { DefaultIcons } from "@/lib/default-icons";
 import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 type WorkspacesProps = {
   session: Session;
@@ -38,15 +39,10 @@ const Workspaces: FC<WorkspacesProps> = async ({ session }) => {
       </WorkspacesContextProvider>
     );
   } catch (error) {
-    const message =
-      error instanceof Error
-        ? error.message
-        : "Server Error. Unable to fetch workspaces.";
-    logError({
+    const { message } = handleServerError({
       error,
+      message: "Failed to get workspaces",
       user: session.user,
-      timestamp: new Date(),
-      message,
     });
     return <ServerError message={message} />;
   }

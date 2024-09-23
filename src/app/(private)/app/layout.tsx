@@ -3,7 +3,6 @@ import { Header } from "@/components/header";
 import { Alerts } from "@/components/alerts";
 
 import {
-  AlertContextProvider,
   UserContextProvider,
   TenantContextProvider,
   WorkspaceContextProvider,
@@ -11,11 +10,9 @@ import {
 import { getUserDbQuery } from "@/state/user-current/actions";
 import { getTenantDbQuery } from "@/state/tenant/actions";
 import { getWorkspaceDbQuery } from "@/state/workspace/actions";
-import { User } from "@/state/user-current/types";
-import { redirect } from "next/navigation";
-import { AppRoutes } from "@/lib/routes.app";
-import { logError } from "@/lib/logging";
 import { checkAuthorized } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { ServerError } from "@/components/server-error";
 
 export default async function Layout({
   children,
@@ -56,16 +53,11 @@ export default async function Layout({
       </UserContextProvider>
     );
   } catch (error) {
-    let message = "Database Error: Unknown Error";
-    if (error instanceof Error) {
-      message = error.message;
-    }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      message,
+    const { message } = handleServerError({
       error,
+      message: "Error getting user, tenant, or workspace",
+      user: session.user,
     });
-    redirect(AppRoutes.ServerError());
+    return <ServerError message={message} />;
   }
 }

@@ -22,9 +22,6 @@ export const CompanyStateProvider: React.FC<CompanyStateProviderProps> = ({
   const router = useRouter();
   const { addAlert } = useAlerts();
 
-  if (!companies || companies.length === 0)
-    return <ServerError msg="No companies found" />;
-
   useEffect(() => {
     if (!companyId) {
       addAlert({
@@ -32,11 +29,14 @@ export const CompanyStateProvider: React.FC<CompanyStateProviderProps> = ({
         message: "No companyId found in the URL",
         type: "error",
       });
-      router.push(AppRoutes.AdminCompanies());
+      router.push(AppRoutes.Companies());
     }
 
     setCompany(companies.find((c) => c.companyId === companyId) || null);
   }, [companyId, companies]);
+
+  if (!companies || companies.length === 0)
+    return <ServerError message="No companies found" />;
 
   return (
     <CompanyContextProvider company={company}>

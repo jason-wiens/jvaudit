@@ -25,6 +25,7 @@ const SelectEmployee: React.FC<SelectEmployeeProps> = ({
       searchable={true}
       onRowClick={(row) => onSelect(row)}
       maxHeight={300}
+      rowIdKey="employeeId"
     >
       <div className="flex items-center gap-2">
         <Button variant="cancel" size="sm" onClick={onCancel}>

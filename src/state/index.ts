@@ -11,13 +11,11 @@ export { useUsers } from "./users/hook";
 export { WorkspacesContextProvider } from "./workspaces/provider";
 export { useWorkspaces } from "./workspaces/hook";
 
-export { CompaniesStateProvider } from "./companies/state";
 export { useCompanies } from "./companies/hook";
 export { CompanyStateProvider } from "./company/state";
 export { useCompany } from "./company/hook";
-export { AuditsStateProvider } from "./audits/state";
-export { useAdminAudits } from "./audits/hook";
-export { AdminAuditContextProvider } from "./admin-audit/provider";
-export { getAdminAudit } from "./admin-audit/actions/get-audit";
-export { useAdminAudit } from "./admin-audit/hook";
+export { useAudits } from "./audits/hook";
+export { AdminAuditContextProvider } from "./audit/provider";
+export { getAudit } from "./audit/actions/get-audit";
+export { useAudit } from "./audit/hook";
 export { auth } from "./auth/next-auth.config";

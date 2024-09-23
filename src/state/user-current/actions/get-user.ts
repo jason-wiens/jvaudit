@@ -1,5 +1,6 @@
 "use server";
 
+import { handleServerError } from "@/lib/handle-server-errors";
 import { logError } from "@/lib/logging";
 import { checkAuthorized } from "@/permissions";
 import { ServerActionResponse } from "@/types/types";
@@ -43,16 +44,10 @@ export const getUser = async (): Promise<
       data: { user },
     };
   } catch (error) {
-    const message = "Database Error: Unable to to get user.";
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
-      message,
       error,
+      message: "Failed to get current user",
     });
-    return {
-      success: false,
-      message,
-    };
   }
 };

@@ -8,8 +8,10 @@ import {
   createStakeholderSchema,
 } from "@/schemas/stakeholder.schema";
 import { serializeZodError } from "@/lib/utils";
-import { logAction, logError } from "@/lib/logging";
+import { logAction } from "@/lib/logging";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function addStakeholder(
   inputs: AddStakeholderFormInputs
@@ -27,12 +29,6 @@ export async function addStakeholder(
   // validate inputs
   const validatedInputs = createStakeholderSchema.safeParse(inputs);
   if (!validatedInputs.success) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      error: validatedInputs.error,
-      message: `Error validating inputs: ${JSON.stringify(inputs, null, 2)}`,
-    });
     return {
       success: false,
       formErrors: serializeZodError(validatedInputs.error),
@@ -76,17 +72,12 @@ export async function addStakeholder(
       success: true,
     };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Error adding stakeholder: ${companyId} to audit: ${auditId}`,
+      user: session.user,
+      message: "Error adding stakeholder",
     });
-    return {
-      success: false,
-      message: `Error adding stakeholder: ${companyId} to audit: ${auditId}`,
-    };
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

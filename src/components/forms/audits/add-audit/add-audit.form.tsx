@@ -4,7 +4,7 @@ import { FC } from "react";
 
 import { useFormAsync } from "@/hooks/use-form-async.hook";
 import { createAuditSchema, AddAuditFormInputs } from "@/schemas/audits.schema";
-import { useAdminAudits } from "@/state";
+import { useAudits, useWorkspace } from "@/state";
 
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -17,11 +17,14 @@ type AddAuditFormProps = {
 };
 
 const AddAuditForm: FC<AddAuditFormProps> = ({ onCancel, onSuccess }) => {
-  const { addAudit } = useAdminAudits();
+  const {
+    workspace: { workspaceId },
+  } = useWorkspace();
+  const { addAudit } = useAudits();
   const { handleSubmit, register, errors, pending, reset } =
     useFormAsync<AddAuditFormInputs>({
       schema: createAuditSchema,
-      action: addAudit,
+      action: (auditData) => addAudit({ auditData, workspaceId }),
       onSuccess,
     });
 

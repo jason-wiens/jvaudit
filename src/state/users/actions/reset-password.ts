@@ -10,6 +10,7 @@ import { generateStrongPassword } from "@/lib/utils";
 import bcrypt from "bcryptjs";
 import { isValidUUID } from "@/lib/utils";
 import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export async function resetPassword(inputs: {
   userId: User["userId"];
@@ -56,18 +57,10 @@ export async function resetPassword(inputs: {
     revalidatePath(AppRoutes.Users(), "page");
     return { success: true, data: { password } };
   } catch (error) {
-    const message = `Error Resetting Password for userId, ${inputs.userId}: ${
-      error instanceof Error ? error.message : "Unknown Error"
-    }`;
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
       error,
-      message,
+      message: "Failed to reset user password",
     });
-    return {
-      success: false,
-      message,
-    };
   }
 }

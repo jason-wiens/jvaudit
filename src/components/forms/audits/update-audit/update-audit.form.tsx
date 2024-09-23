@@ -2,7 +2,7 @@
 
 import React, { FC } from "react";
 
-import { useAdminAudit } from "@/state";
+import { useAudit } from "@/state";
 
 import { EditableField, EditableFieldError } from "@/components/editable-field";
 import {
@@ -10,10 +10,9 @@ import {
   updateAuditSchema,
 } from "@/schemas/audits.schema";
 import { serializeZodError } from "@/lib/utils";
-import { Audit } from "@prisma/client";
 
 const UpdateAuditForm: FC = () => {
-  const { audit, updateAudit } = useAdminAudit();
+  const { audit, updateAudit } = useAudit();
 
   if (!audit) return null;
   const { auditNumber, auditDescription } = audit;

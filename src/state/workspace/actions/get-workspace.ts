@@ -1,5 +1,6 @@
 "use server";
 
+import { handleServerError } from "@/lib/handle-server-errors";
 import { logError } from "@/lib/logging";
 import { checkAdmin } from "@/permissions";
 import { ServerActionResponse } from "@/types/types";
@@ -51,16 +52,10 @@ export const getWorkspace = async ({
       data: { workspace },
     };
   } catch (error) {
-    const message = "Database Error: Unable to to get audit.";
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      message: "Failed to get workspace",
+      user: session.user,
     });
-    return {
-      success: false,
-      message,
-    };
   }
 };

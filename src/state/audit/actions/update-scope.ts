@@ -10,6 +10,8 @@ import {
 import { isValidUUID, serializeZodError } from "@/lib/utils";
 import { logAction, logError } from "@/lib/logging";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type UpdateScopeInput = {
   scopeId: string;
@@ -41,12 +43,6 @@ export async function updateScope({
   // validate inputs
   const validatedInputs = updateScopeSchema.safeParse(scopeData);
   if (!validatedInputs.success) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      error: validatedInputs.error,
-      message: `Error validating inputs: ${JSON.stringify(scopeData, null, 2)}`,
-    });
     return {
       success: false,
       formErrors: serializeZodError(validatedInputs.error),
@@ -71,18 +67,12 @@ export async function updateScope({
     });
     return { success: true };
   } catch (error) {
-    const message = `Error updating scope: ${scopeId}`;
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      user: session.user,
+      message: "Error updating scope",
     });
-    return {
-      success: false,
-      message,
-    };
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

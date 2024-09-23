@@ -29,6 +29,7 @@ const SelectCompany: React.FC<SelectCompanyProps> = ({
       searchable={true}
       onRowClick={(row) => onSelect(row)}
       maxHeight={300}
+      rowIdKey="companyId"
     >
       <div className="flex items-center gap-2">
         <Button variant="secondary" size="sm" onClick={onCancel}>

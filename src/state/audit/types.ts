@@ -1,4 +1,4 @@
-import { getAdminAuditDbQuery } from "./actions";
+import { getAudit } from "./actions";
 
 import { UpdateAuditFormInputs } from "@/schemas/audits.schema";
 import {
@@ -12,15 +12,14 @@ import {
 import { AddStakeholderFormInputs } from "@/schemas/stakeholder.schema";
 import { ServerActionResponse } from "@/types/types";
 
-export type Audit = NonNullable<
-  Awaited<ReturnType<typeof getAdminAuditDbQuery>>
->;
+export type Audit = NonNullable<Awaited<ReturnType<typeof getAudit>>>;
 export type Stakeholder = Audit["stakeholders"][0];
 export type Resource = Audit["resources"][0];
 export type Scope = Audit["scopes"][0];
 export type Company = Stakeholder["company"];
+export type Employee = Resource["employee"];
 
-export type IAdminAuditContext = {
+export type IAuditContext = {
   audit: Audit | null;
   pending: boolean;
   updateAudit: (inputs: {
@@ -36,7 +35,7 @@ export type IAdminAuditContext = {
   ) => Promise<void>;
   addResource: (inputs: {
     resourceData: AddResourceFormInputs;
-    employee: Resource["employee"];
+    employee: Employee;
   }) => Promise<void>;
   updateResource: (inputs: {
     resourceId: Resource["resourceId"];

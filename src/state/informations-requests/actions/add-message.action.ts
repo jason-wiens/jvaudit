@@ -8,9 +8,11 @@ import {
 import type { ServerActionResponse } from "@/types/types";
 import { checkAuthorized } from "@/permissions";
 import { serializeZodError } from "@/lib/utils";
-import { logError, logAction } from "@/lib/logging";
+import { logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
 import sanitize from "sanitize-html";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function addIrMessage(
   inputs: AddIrMessageFormInputs
@@ -66,22 +68,14 @@ export async function addIrMessage(
       message: `Added message to IR ${irNumber}`,
     });
 
-    revalidatePath("/app/audits/[auditId]", "layout");
-
     return { success: true };
   } catch (error) {
-    const message = irNumber
-      ? `Unable to create message for IR ${irNumber}`
-      : `Error finding IR: ${irId}`;
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      message: "Failed to delete / deactivate company",
+      user: session.user,
     });
-    return {
-      success: false,
-      message,
-    };
+  } finally {
+    revalidatePath(AppRoutes.InformationRequest(), "page");
   }
 }

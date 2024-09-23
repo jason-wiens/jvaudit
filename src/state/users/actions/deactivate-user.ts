@@ -8,6 +8,7 @@ import { logError, logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
 import { isValidUUID } from "@/lib/utils";
 import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export async function deactivateUser(inputs: {
   userId: User["userId"];
@@ -48,21 +49,17 @@ export async function deactivateUser(inputs: {
       type: "update",
       message: `User ${user.username} has successfully been deactivated`,
     });
-    revalidatePath(AppRoutes.Users(), "page");
     return { success: true };
   } catch (error) {
     const message = `Error deactivating user, UserId, ${inputs.userId}: ${
       error instanceof Error ? error.message : "Unknown Error"
     }`;
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
       error,
-      message,
+      message: "Failed to deactivate user",
     });
-    return {
-      success: false,
-      message,
-    };
+  } finally {
+    revalidatePath(AppRoutes.Users(), "page");
   }
 }

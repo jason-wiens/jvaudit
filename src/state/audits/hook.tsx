@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { AuditsContext } from "./provider";
 
-export const useAdminAudits = () => {
+export const useAudits = () => {
   const context = useContext(AuditsContext);
 
   if (!context) {

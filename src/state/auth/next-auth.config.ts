@@ -7,6 +7,7 @@ import { User } from "next-auth";
 
 import { AppRoutes } from "@/lib/routes.app";
 import { logError } from "@/lib/logging";
+import { generateRandomId } from "@/lib/utils";
 
 export const {
   auth,
@@ -41,6 +42,7 @@ export const {
 
         if (!user) {
           logError({
+            id: generateRandomId(),
             timestamp: new Date(),
             message: `User not found: ${username}`,
             error: new Error(`User not found: ${username}`),
@@ -50,6 +52,7 @@ export const {
 
         if (!user.active) {
           logError({
+            id: generateRandomId(),
             timestamp: new Date(),
             message: `User is inactive: ${username}`,
             error: new Error(`User is inactive: ${username}`),

@@ -25,7 +25,7 @@ import {
 } from "@/schemas/scope.schema";
 
 import {
-  IAdminAuditContext,
+  IAuditContext,
   OptimisticAuditAction,
   AuditAction,
   Audit,
@@ -42,7 +42,7 @@ type AuditContextProviderProps = {
   audit: Audit;
 };
 
-export const AdminAuditContext = createContext<IAdminAuditContext | null>(null);
+export const AuditContext = createContext<IAuditContext | null>(null);
 
 export function AdminAuditContextProvider({
   children,
@@ -329,7 +329,7 @@ export function AdminAuditContextProvider({
     });
 
   return (
-    <AdminAuditContext.Provider
+    <AuditContext.Provider
       value={{
         audit: optimisticAudit,
         pending,
@@ -345,6 +345,6 @@ export function AdminAuditContextProvider({
       }}
     >
       {children}
-    </AdminAuditContext.Provider>
+    </AuditContext.Provider>
   );
 }

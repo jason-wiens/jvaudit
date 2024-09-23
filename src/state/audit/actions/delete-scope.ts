@@ -7,18 +7,18 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { uuidRegex } from "@/lib/utils";
 import { checkAdmin } from "@/permissions";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
-const deleteResourceParams = z.object({
-  resourceId: z
-    .string()
-    .regex(uuidRegex, { message: "Invalid stakeholder ID" }),
+const deleteScopeParams = z.object({
+  scopeId: z.string().regex(uuidRegex, { message: "Invalid stakeholder ID" }),
 });
 
-type DeleteResourceParams = z.infer<typeof deleteResourceParams>;
+type DeleteScopeParams = z.infer<typeof deleteScopeParams>;
 
-export async function deleteResource(
-  inputs: DeleteResourceParams
-): Promise<ServerActionResponse<DeleteResourceParams>> {
+export async function deleteScope(
+  inputs: DeleteScopeParams
+): Promise<ServerActionResponse<DeleteScopeParams>> {
   const { session, message } = await checkAdmin();
   if (!session) {
     return {
@@ -29,7 +29,7 @@ export async function deleteResource(
   const tenantId = session.user.tenantId;
 
   // validate inputs
-  const validatedInputs = deleteResourceParams.safeParse(inputs);
+  const validatedInputs = deleteScopeParams.safeParse(inputs);
   if (!validatedInputs.success) {
     return {
       success: false,
@@ -37,42 +37,42 @@ export async function deleteResource(
     };
   }
 
-  const { resourceId } = validatedInputs.data;
+  const { scopeId } = validatedInputs.data;
 
   try {
     // check if resource exists
-    const resource = await prisma.resource.findUnique({
-      where: { resourceId, tenantId },
+    const scope = await prisma.scope.findUnique({
+      where: { scopeId, tenantId },
       include: { audit: true },
     });
 
-    if (!resource) {
+    if (!scope) {
       return {
         success: false,
-        message: "Resource not found",
+        message: "Scope not found",
       };
     }
 
     // after an audit is confirmed, stakeholders can not be deleted
     // so we check if the audit is in CREATED status
-    if (resource.audit.status === AuditStatus.CREATED) {
-      await prisma.resource.delete({
-        where: { resourceId, tenantId },
+    if (scope.audit.status === AuditStatus.CREATED) {
+      await prisma.scope.delete({
+        where: { scopeId, tenantId },
       });
       return { success: true };
     } else {
       return {
         success: false,
-        message:
-          "Can not delete resource from an audit that has been confirmed",
+        message: "Can not delete a scope from an audit that has been confirmed",
       };
     }
   } catch (error) {
-    return {
-      success: false,
-      message: "An error occurred while deleting the resource",
-    };
+    return handleServerError({
+      error,
+      user: session.user,
+      message: "Error deleting scope",
+    });
   } finally {
-    revalidatePath("/admin/audits/[auditId]", "layout");
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

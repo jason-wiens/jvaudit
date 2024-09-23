@@ -36,8 +36,8 @@ const KeyValue = React.forwardRef<HTMLDivElement, KeyValueProps>(
     return (
       <div className="w-full flex flex-col gap-4">
         {data.map((item, index) => (
-          <div className="border-b border-zinc-200 pb-4 flex">
-            <div className="w-1/3 border-r border-zinc-200 pr-8" key={index}>
+          <div className="border-b border-zinc-200 pb-4 flex" key={index}>
+            <div className="w-1/3 border-r border-zinc-200 pr-8">
               <h2 className=" text-lg text-secondary-500">{item.label}</h2>
               <p className="text-zinc-500 text-sm italic">
                 {item.labelDescription}
@@ -55,5 +55,6 @@ const KeyValue = React.forwardRef<HTMLDivElement, KeyValueProps>(
     );
   }
 );
+KeyValue.displayName = "KeyValue";
 
 export default KeyValue;

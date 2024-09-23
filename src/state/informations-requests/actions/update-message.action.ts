@@ -12,6 +12,8 @@ import { serializeZodError } from "@/lib/utils";
 import { logError, logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
 import sanitize from "sanitize-html";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function updateIrMessage(inputs: {
   messageId: string;
@@ -72,21 +74,16 @@ export async function updateIrMessage(inputs: {
       type: "update",
       message: `Updated message ${messageId}`,
     });
-    revalidatePath("/app/audits/[auditId]", "layout");
     return {
       success: true,
     };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
       error,
-      message: `Error updating IR message ${messageId}`,
+      message: "Failed to update message",
     });
-
-    return {
-      success: false,
-      message: `Error updating IR message ${messageId}`,
-    };
+  } finally {
+    revalidatePath(AppRoutes.InformationRequest(), "page");
   }
 }

@@ -3,8 +3,10 @@
 import prisma from "@lib/db";
 import { ServerActionResponse } from "@/types/types";
 import { checkAuthorized } from "@/permissions";
-import { logError, logAction } from "@/lib/logging";
+import { logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function deleteIrMessage(
   messageId: string
@@ -56,22 +58,16 @@ export async function deleteIrMessage(
       message: `Successfully deleted message: ${messageId}`,
     });
 
-    revalidatePath("/app/audits/[auditId]", "layout");
-
     return {
       success: true,
     };
   } catch (error) {
-    const message = `Failed to delete message: ${messageId}`;
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      message: "Failed to delete message",
+      user: session.user,
     });
-    return {
-      success: false,
-      message,
-    };
+  } finally {
+    revalidatePath(AppRoutes.InformationRequest(), "page");
   }
 }

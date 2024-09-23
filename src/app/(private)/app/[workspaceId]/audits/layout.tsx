@@ -1,5 +1,3 @@
-import { UserAuditsState } from "@/state";
-
 import { Suspense } from "react";
 import Loading from "./loading";
 

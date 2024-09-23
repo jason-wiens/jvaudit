@@ -5,6 +5,8 @@ import type { ServerActionResponse } from "@/types/types";
 import { checkAdmin } from "@/permissions";
 import { revalidatePath } from "next/cache";
 import { logError, logAction } from "@/lib/logging";
+import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export async function deleteEmployee(
   employeeId: string
@@ -37,17 +39,12 @@ export async function deleteEmployee(
 
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      message: `Error deleting employee: ${employeeId}`,
+    return handleServerError({
       error,
+      message: "Failed to delete employee",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the company",
-    };
   } finally {
-    revalidatePath("/admin", "layout");
+    revalidatePath(AppRoutes.Company(), "page");
   }
 }

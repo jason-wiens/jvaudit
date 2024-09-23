@@ -1,6 +1,6 @@
 "use server";
 
-import { Audit, Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import prisma from "@lib/db";
 import { createAuditSchema, AddAuditFormInputs } from "@/schemas/audits.schema";
 import type { FormError, ServerActionResponse } from "@/types/types";
@@ -8,10 +8,16 @@ import { checkAdmin } from "@/permissions";
 import { serializeZodError } from "@/lib/utils";
 import { logError, logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
+import { isValidUUID } from "@/lib/utils";
+import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
-export async function addAudit(
-  inputs: AddAuditFormInputs
-): Promise<ServerActionResponse<AddAuditFormInputs>> {
+export async function addAudit(inputs: {
+  auditData: AddAuditFormInputs;
+  workspaceId: string;
+}): Promise<ServerActionResponse<AddAuditFormInputs>> {
+  const { auditData, workspaceId } = inputs;
+
   // check permissions
   const { session, message } = await checkAdmin();
   if (!session) {
@@ -23,23 +29,29 @@ export async function addAudit(
   const tenantId = session.user.tenantId;
 
   // validate inputs
-  const validatedInputs = createAuditSchema.safeParse(inputs);
+  const validatedInputs = createAuditSchema.safeParse(auditData);
   if (!validatedInputs.success) {
     return {
       success: false,
       formErrors: serializeZodError(validatedInputs.error),
     };
   }
-
   const { auditNumber, auditDescription } = validatedInputs.data;
+  if (!isValidUUID(inputs.workspaceId)) {
+    return {
+      success: false,
+      message: "Invalid workspace ID",
+    };
+  }
 
   // add company
   try {
-    const audit = await prisma.audit.create({
+    await prisma.audit.create({
       data: {
         auditNumber,
         auditDescription,
         tenantId,
+        workspaceId,
       },
     });
 
@@ -49,42 +61,31 @@ export async function addAudit(
       type: "add",
       message: `Audit added: ${validatedInputs.data.auditNumber}`,
     });
-    revalidatePath("/admin", "layout");
     return { success: true };
   } catch (error) {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       if (error.code === "P2002") {
         const uniqueConstraint = (error.meta?.target as string[]) || [];
-        const formErrors: FormError<AddAuditFormInputs>[] = [];
         if (uniqueConstraint.includes("auditNumber")) {
-          formErrors.push({
-            field: "auditNumber",
-            message: "This audit number already exists",
-          });
+          return {
+            success: false,
+            formErrors: [
+              {
+                field: "auditNumber",
+                message: "This audit number already exists",
+              },
+            ],
+          };
         }
-        logError({
-          timestamp: new Date(),
-          user: session.user,
-          error,
-          message: `Error adding Audit, violated unique constraints: ${uniqueConstraint.join(
-            ", "
-          )}`,
-        });
-        return {
-          success: false,
-          formErrors,
-        };
       }
     }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+
+    return handleServerError({
       error,
-      message: `Unable to create audit: ${validatedInputs.data.auditNumber}`,
+      message: "Failed to add audit",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the audit",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Audits(), "page");
   }
 }

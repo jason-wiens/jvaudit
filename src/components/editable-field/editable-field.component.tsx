@@ -171,5 +171,6 @@ const EditableField = React.forwardRef<HTMLDivElement, EditableFieldProps>(
     );
   }
 );
+EditableField.displayName = "EditableField";
 
 export default EditableField;

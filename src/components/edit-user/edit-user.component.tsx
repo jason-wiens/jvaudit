@@ -71,7 +71,8 @@ export const EditUser: FC<EditUserProps> = ({ user }) => {
         <DialogHeader>
           <DialogTitle>Edit User</DialogTitle>
           <DialogDescription>
-            Please fill out the form and click "Edit User" to save changes.
+            Please fill out the form and click &quot;Edit User&quot; to save
+            changes.
           </DialogDescription>
           <DialogClose />
         </DialogHeader>

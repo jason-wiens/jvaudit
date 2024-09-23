@@ -9,6 +9,7 @@ import { cleanUndefinedFields, serializeZodError } from "@/lib/utils";
 import { logError, logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
 import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export async function updateUser(inputs: {
   userId: User["userId"];
@@ -88,19 +89,14 @@ export async function updateUser(inputs: {
       type: "update",
       message: `User succesfully updated, UserId: ${inputs.userId}`,
     });
-    revalidatePath(AppRoutes.Users(), "page");
     return { success: true };
   } catch (error) {
-    const message = `Error updating user, UserId: ${inputs.userId}`;
-    logError({
-      timestamp: new Date(),
+    return handleServerError({
       user: session.user,
       error,
-      message,
+      message: "Failed to add user",
     });
-    return {
-      success: false,
-      message,
-    };
+  } finally {
+    revalidatePath(AppRoutes.Users(), "page");
   }
 }

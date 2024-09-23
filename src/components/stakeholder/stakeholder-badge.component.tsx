@@ -1,8 +1,9 @@
 import React from "react";
 
 import { Badge } from "../badge";
-import { Stakeholder, StakeholderType } from "./stakeholder.types";
-import { formatStakeholderType } from "@/lib/formatters/stakeholder-type.formatter";
+import type { Stakeholder } from "@/state/audit/types";
+import { beautifyEnumTerm } from "@/lib/beautify-enums";
+import { StakeholderType } from "@prisma/client";
 
 type StakeholderBadgeProps = {
   stakeholder: Stakeholder;
@@ -37,7 +38,7 @@ export const StakeholderBadge: React.FC<StakeholderBadgeProps> = ({
   return (
     <Badge
       onDelete={!!onDelete ? () => onDelete(stakeholderId) : undefined}
-      label={formatStakeholderType(type)}
+      label={beautifyEnumTerm(type)}
       variant={variantType(type)}
     >
       <div className="w-1 h-full bg-secondary-500"></div>

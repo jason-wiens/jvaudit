@@ -13,6 +13,7 @@ import bcrypt from "bcryptjs";
 import { AppRoutes } from "@/lib/routes.app";
 import { auth, signIn } from "@/state/auth/next-auth.config";
 import { AuthError } from "next-auth";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export async function changePassword(
   inputs: ChangePasswordFormInputs
@@ -107,19 +108,10 @@ export async function changePassword(
         message: "Unable to sign in after changing password",
       };
     }
-    const message =
-      error instanceof Error
-        ? error.message
-        : `Error Changing Password for user, userId: ${userId}`;
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      message: "Failed to change password",
+      user: session.user,
     });
-    return {
-      success: false,
-      message,
-    };
   }
 }

@@ -259,6 +259,8 @@ model InformationRequest {
   netAmount          Float          @default(0)
   resolved           Boolean        @default(false)
   resolvedDate       DateTime?
+  active              Boolean       @default(true)
+  activeDate          DateTime      @default(now())
 
   submittedTo        Employee[]      @relation(name: "submittedTo") 
   author             Employee        @relation(name: "author", fields: [authorId], references: [employeeId])

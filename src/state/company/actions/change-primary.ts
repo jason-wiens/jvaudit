@@ -5,6 +5,8 @@ import type { ServerActionResponse } from "@/types/types";
 import { checkAdmin } from "@/permissions";
 import { revalidatePath } from "next/cache";
 import { logAction, logError } from "@/lib/logging";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 type ChangePrimaryContactInputs = {
   employeeId: string;
@@ -67,17 +69,12 @@ export async function changePrimaryContact({
     });
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      message: "An error occurred while changing the primary contact",
+    return handleServerError({
       error,
+      message: "Failed to delete / deactivate company",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while changing the primary contact",
-    };
   } finally {
-    revalidatePath("/admin", "layout");
+    revalidatePath(AppRoutes.Company(), "page");
   }
 }

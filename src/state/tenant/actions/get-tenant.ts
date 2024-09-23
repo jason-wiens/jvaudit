@@ -1,5 +1,6 @@
 "use server";
 
+import { handleServerError } from "@/lib/handle-server-errors";
 import { logError } from "@/lib/logging";
 import { checkAdmin } from "@/permissions";
 import { ServerActionResponse } from "@/types/types";
@@ -44,16 +45,10 @@ export const getTenant = async (): Promise<
       data: { tenant },
     };
   } catch (error) {
-    const message = "Database Error: Unable to to get tenant.";
-    logError({
-      timestamp: new Date(),
-      user: session.user,
-      message,
+    return handleServerError({
       error,
+      message: "Failed to get tenant",
+      user: session.user,
     });
-    return {
-      success: false,
-      message,
-    };
   }
 };

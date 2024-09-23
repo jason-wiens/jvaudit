@@ -1,4 +1,5 @@
 import { uuidRegex } from "@/lib/utils";
+import { resolve } from "path";
 import { z } from "zod";
 
 const baseInformationRequestSchema = z.object({
@@ -39,6 +40,7 @@ export const updateInformationRequestSchema = baseInformationRequestSchema
     actionRequested: z.string().trim().optional(),
     grossAmount: z.number().optional(),
     netAmount: z.number().optional(),
+    resolved: z.boolean().optional(),
   });
 
 export type AddInformationRequestFormInputs = z.infer<

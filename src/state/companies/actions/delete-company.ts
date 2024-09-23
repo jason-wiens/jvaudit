@@ -5,6 +5,8 @@ import type { ServerActionResponse } from "@/types/types";
 import { checkAdmin } from "@/permissions";
 import { revalidatePath } from "next/cache";
 import { logError, logAction } from "@/lib/logging";
+import { AppRoutes } from "@/lib/routes.app";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 type DeleteCompanyInputs = {
   companyId: string;
@@ -81,18 +83,14 @@ export async function deleteCompany({
       message: `Company deleted: ${companyId}`,
     });
 
-    revalidatePath("/admin", "layout");
     return { success: true };
   } catch (error) {
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Error deleting company: ${companyId}`,
+      message: "Failed to delete / deactivate company",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while deleteing the company",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Companies(), "page");
   }
 }

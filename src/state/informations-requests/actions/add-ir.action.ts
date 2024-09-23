@@ -9,8 +9,10 @@ import {
 import type { ServerActionResponse } from "@/types/types";
 import { checkAuthorized } from "@/permissions";
 import { serializeZodError, getNextAvailableInteger } from "@/lib/utils";
-import { logError, logAction } from "@/lib/logging";
+import { logAction } from "@/lib/logging";
 import { revalidatePath } from "next/cache";
+import { handleServerError } from "@/lib/handle-server-errors";
+import { AppRoutes } from "@/lib/routes.app";
 
 export async function addInformationRequest(
   inputs: AddInformationRequestFormInputs
@@ -65,35 +67,14 @@ export async function addInformationRequest(
       type: "add",
       message: `IR ${number} added to audit ${audit.auditNumber}`,
     });
-    revalidatePath("/app/audits/[auditId]", "layout");
     return { success: true };
   } catch (error) {
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2002") {
-        const uniqueConstraint = (error.meta?.target as string[]) || [];
-        logError({
-          timestamp: new Date(),
-          user: session.user,
-          error,
-          message: `Error adding Audit, violated unique constraints: ${uniqueConstraint.join(
-            ", "
-          )}`,
-        });
-        return {
-          success: false,
-          message: `The IR number is already in use. Please try again.`,
-        };
-      }
-    }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message: `Unable to create IR for audit ${auditId}`,
+      message: "Failed to add Information Request",
+      user: session.user,
     });
-    return {
-      success: false,
-      message: "An error occurred while adding the Information Request",
-    };
+  } finally {
+    revalidatePath(AppRoutes.Audit(), "page");
   }
 }

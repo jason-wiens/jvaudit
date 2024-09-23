@@ -11,6 +11,7 @@ import { AppRoutes } from "@/lib/routes.app";
 import { ServerActionResponse } from "@/types/types";
 import { Prisma, Workspace } from "@prisma/client";
 import { isValidUUID } from "@/lib/utils";
+import { handleServerError } from "@/lib/handle-server-errors";
 
 export const updateWorkspace = async (inputs: {
   workspaceId: Workspace["workspaceId"];
@@ -66,25 +67,11 @@ export const updateWorkspace = async (inputs: {
       success: true,
     };
   } catch (error) {
-    let message =
-      error instanceof Error
-        ? error.message
-        : `Error Updating Workspace: ${workspaceId}`;
-    if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      if (error.code === "P2025") {
-        message = `Error updating workspace: ${workspaceId}, workspace does not exist.`;
-      }
-    }
-    logError({
-      timestamp: new Date(),
-      user: session.user,
+    return handleServerError({
       error,
-      message,
+      message: "Failed to update workspace",
+      user: session.user,
     });
-    return {
-      success: false,
-      message,
-    };
   } finally {
     revalidatePath(AppRoutes.Workspaces(), "page");
   }
