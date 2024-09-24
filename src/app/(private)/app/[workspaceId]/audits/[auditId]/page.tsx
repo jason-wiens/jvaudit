@@ -11,11 +11,11 @@ import { NotAuthorized } from "@/components/not-authorized";
 import { logError } from "@/lib/logging";
 import { ServerError } from "@/components/server-error";
 import { KeyValue, type KeyValueData } from "@/components/key-value";
-import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/badge";
 import { auth } from "@/state/auth/next-auth.config";
 import { handleServerError } from "@/lib/handle-server-errors";
 import { beautifyEnumTerm } from "@/lib/beautify-enums";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 type AuditPageProps = {
   params: {
@@ -97,30 +97,40 @@ const AuditPage: FC<AuditPageProps> = async ({
           "The primary contact(s) for the audit. All information requests, reports, responses will be submitted the audit contacts at the Operator's office.",
         values: audit.resources
           .filter((r) => r.type === ResourceType.AUDIT_CONTACT_OPERATOR)
-          .map((r, i) => (
-            <Avatar
-              user={r.employee.personalProfile}
-              size="md"
-              variant="dark"
-              showDetails
-              key={i}
-            />
-          )),
+          .map((r, i) => {
+            const {
+              employee: {
+                personalProfile: { firstName, lastName },
+              },
+            } = r;
+            return (
+              <Avatar key={i}>
+                <AvatarFallback className="uppercase">
+                  {`${firstName[0]}${lastName[0]}`}
+                </AvatarFallback>
+              </Avatar>
+            );
+          }),
       },
       {
         label: "Audit Contact (Audit Lead / Non-Operator)",
         labelDescription: "Other stakeholder contact(s) for the audit.",
         values: audit.resources
           .filter((r) => r.type === ResourceType.AUDIT_CONTACT_NON_OPERATOR)
-          .map((r, i) => (
-            <Avatar
-              user={r.employee.personalProfile}
-              size="md"
-              variant="dark"
-              showDetails
-              key={i}
-            />
-          )),
+          .map((r, i) => {
+            const {
+              employee: {
+                personalProfile: { firstName, lastName },
+              },
+            } = r;
+            return (
+              <Avatar key={i}>
+                <AvatarFallback className="uppercase">
+                  {`${firstName[0]}${lastName[0]}`}
+                </AvatarFallback>
+              </Avatar>
+            );
+          }),
       },
       {
         label: "Auditors",
@@ -128,15 +138,20 @@ const AuditPage: FC<AuditPageProps> = async ({
           "The auditors assigned to the audit. The auditor's are responsible for executing the audit fieldwork.",
         values: audit.resources
           .filter((r) => r.type === ResourceType.AUDITOR)
-          .map((r, i) => (
-            <Avatar
-              user={r.employee.personalProfile}
-              size="md"
-              variant="secondary"
-              showDetails
-              key={i}
-            />
-          )),
+          .map((r, i) => {
+            const {
+              employee: {
+                personalProfile: { firstName, lastName },
+              },
+            } = r;
+            return (
+              <Avatar key={i}>
+                <AvatarFallback className="uppercase">
+                  {`${firstName[0]}${lastName[0]}`}
+                </AvatarFallback>
+              </Avatar>
+            );
+          }),
       },
       {
         label: "Audit Scope",

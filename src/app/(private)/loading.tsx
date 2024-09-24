@@ -7,7 +7,7 @@ import { Building2 } from "lucide-react";
 const Loading = () => {
   return (
     <div className="min-h-screen w-full h-1">
-      <Header loading />
+      <Header />
       <div className="flex w-full h-full relative">
         <div className="w-56">
           <div className="bg-zinc-50 h-full w-full border-r border-zinc-200">

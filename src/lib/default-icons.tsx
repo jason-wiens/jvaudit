@@ -13,60 +13,64 @@ import {
   Layers3,
   Pencil,
   RefreshCw,
+  LogOut,
 } from "lucide-react";
 
 type IconProps = {
   size?: number;
   className?: string;
-} | null;
+};
 
 export class DefaultIcons {
-  static Users = (inputs: IconProps) => (
+  static Users = (inputs?: IconProps) => (
     <Users size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Companies = (inputs: IconProps) => (
+  static Companies = (inputs?: IconProps) => (
     <Building2 size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static NotificationSettings = (inputs: IconProps) => (
+  static NotificationSettings = (inputs?: IconProps) => (
     <BellDot size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Workspaces = (inputs: IconProps) => (
+  static Workspaces = (inputs?: IconProps) => (
     <LayoutPanelTop
       size={inputs?.size || 16}
       className={inputs?.className || ""}
     />
   );
-  static Workspace = (inputs: IconProps) => (
+  static Workspace = (inputs?: IconProps) => (
     <Layers3 size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Home = (inputs: IconProps) => (
+  static Home = (inputs?: IconProps) => (
     <Home size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Audits = (inputs: IconProps) => (
+  static Audits = (inputs?: IconProps) => (
     <Table size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Settings = (inputs: IconProps) => (
+  static Settings = (inputs?: IconProps) => (
     <Settings size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Notifications = (inputs: IconProps) => (
+  static Notifications = (inputs?: IconProps) => (
     <Bell size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Dashboard = (inputs: IconProps) => (
+  static Dashboard = (inputs?: IconProps) => (
     <LayoutDashboard
       size={inputs?.size || 16}
       className={inputs?.className || ""}
     />
   );
-  static Tenants = (inputs: IconProps) => (
+  static Tenants = (inputs?: IconProps) => (
     <Castle size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Billings = (inputs: IconProps) => (
+  static Billings = (inputs?: IconProps) => (
     <DollarSign size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Edit = (inputs: IconProps) => (
+  static Edit = (inputs?: IconProps) => (
     <Pencil size={inputs?.size || 16} className={inputs?.className || ""} />
   );
-  static Pending = (inputs: IconProps) => (
+  static Pending = (inputs?: IconProps) => (
     <RefreshCw size={inputs?.size || 16} className={inputs?.className || ""} />
+  );
+  static Logout = (inputs?: IconProps) => (
+    <LogOut size={inputs?.size || 16} className={inputs?.className || ""} />
   );
 }

@@ -24,15 +24,17 @@ export default async function Layout({
   const tenantId = session.user.tenantId;
 
   try {
-    const user = await getUserDbQuery({ tenantId, userId });
-    if (!user) throw new Error("User not found");
-
-    const [workspace, tenant] = await Promise.all([
-      getWorkspaceDbQuery({ workspaceId: user?.defaultWorkspaceId, tenantId }),
+    const [workspace, tenant, user] = await Promise.all([
+      getWorkspaceDbQuery({
+        workspaceId: session.user.defaultWorkspaceId,
+        tenantId,
+      }),
       getTenantDbQuery({ tenantId }),
+      getUserDbQuery({ tenantId, userId }),
     ]);
     if (!workspace) throw new Error("Workspace not found");
     if (!tenant) throw new Error("Tenant not found");
+    if (!user) throw new Error("User not found");
 
     return (
       <UserContextProvider user={user}>
