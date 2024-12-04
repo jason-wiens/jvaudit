@@ -33,8 +33,8 @@ export default function LoginPage() {
               </Link>
             </div>
           </div>
-          <form action={handleSubmit}>
-            <div className="space-y-1">
+          <form action={handleSubmit} className="">
+            <div className="space-y-1 mb-4">
               <Label htmlFor="username" className="">
                 Username
               </Label>

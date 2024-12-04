@@ -12,6 +12,7 @@ import { ServerError } from "@/components/server-error";
 import { DefaultIcons } from "@/lib/default-icons";
 import { AppRoutes } from "@/lib/routes.app";
 import { handleServerError } from "@/lib/handle-server-errors";
+import { WorkspacesTable } from "@/components/tables";
 
 type WorkspacesProps = {
   session: Session;
@@ -34,7 +35,9 @@ const Workspaces: FC<WorkspacesProps> = async ({ session }) => {
           </Button>
         </TopBar>
         <div className="p-8 w-full max-w-container mx-auto">
-          <Card title="Companies">Table Here</Card>
+          <Card title="Workspaces">
+            <WorkspacesTable />
+          </Card>
         </div>
       </WorkspacesContextProvider>
     );

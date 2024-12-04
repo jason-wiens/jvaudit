@@ -2,7 +2,7 @@ import { ColumnDef } from "@/components/data-table";
 import { Employee } from "@/state/company/types";
 import { AddEmployee } from "@/components/add-employee";
 import { Button } from "@/components/ui/button";
-import { EmployeeDropDownMenu } from "@/components/drop-down-menus/employee";
+import { EmployeeDropDownMenu } from "@/components/drop-down-menus";
 import { Plus, Ellipsis } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";

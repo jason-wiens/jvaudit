@@ -1,3 +1,5 @@
+"use server";
+
 import {
   createWorkspaceSchema,
   AddWorkspaceFormInputs,
@@ -10,6 +12,7 @@ import { revalidatePath } from "next/cache";
 import { AppRoutes } from "@/lib/routes.app";
 import { ServerActionResponse } from "@/types/types";
 import { handleServerError } from "@/lib/handle-server-errors";
+import { wait } from "@/lib/utils";
 
 export const addWorkspace = async (
   inputs: AddWorkspaceFormInputs
@@ -50,6 +53,8 @@ export const addWorkspace = async (
       type: "add",
       message: `Created workspace: ${name}`,
     });
+
+    await wait(2000);
 
     return {
       success: true,
